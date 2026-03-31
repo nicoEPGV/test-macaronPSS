@@ -237,9 +237,10 @@
 </div>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszipmin.js
+
 
 <script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.s 
 /* CHANGE COLOR */
 document.getElementById("color-picker").addEventListener("change", function() {
     document.documentElement.style.setProperty('--logo-color', this.value);
@@ -267,9 +268,8 @@ function addAutoCircleIDs() {
 }
 
 // Lancer juste après l’insertion du SVG
-    document.querySelectorAll('g[id^="CIRCLE"] path').forEach(p => {
-    p.removeAttribute("fill");
-});
+   document.querySelectorAll('g[id^="CIRCLE"] path').forEach(p => p.removeAttribute("fill"));
+
 setTimeout(addAutoCircleIDs, 200);
 
 // Activer ensuite le toggle
@@ -367,8 +367,6 @@ document.getElementById("export-zip-btn").onclick = async () => {
     a.download = "logo_export.zip";
     a.click();
 };
-
-/* INIT AFTER SVG INSERTION */
 
 </script>
 

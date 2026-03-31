@@ -82,16 +82,17 @@
     }
 
    
+
 .circle-toggle {
     cursor: pointer;
     transition: 0.2s;
-    fill: white;  /* cercle "vide" */
-    stroke: var(--logo-color); 
+    fill: white !important;
+    stroke: var(--logo-color) !important; 
     stroke-width: 2;
 }
 
 .circle-toggle.filled {
-    fill: var(--logo-color); /* cercle rempli quand cliqué */
+    fill: var(--logo-color) !important;
 }
 
 </style>
@@ -264,6 +265,9 @@ function addAutoCircleIDs() {
 }
 
 // Lancer juste après l’insertion du SVG
+    document.querySelectorAll('g[id^="CIRCLE"] path').forEach(p => {
+    p.removeAttribute("fill");
+});
 setTimeout(addAutoCircleIDs, 200);
 
 // Activer ensuite le toggle
@@ -363,7 +367,6 @@ document.getElementById("export-zip-btn").onclick = async () => {
 };
 
 /* INIT AFTER SVG INSERTION */
-setTimeout(initCircleToggle, 500);
 
 </script>
 

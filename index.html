@@ -248,6 +248,25 @@ document.getElementById("reset-btn").addEventListener("click", function() {
     });
 });
 
+/* AUTO-ID pour tous les cercles */
+function addAutoCircleIDs() {
+    // Sélectionne TOUS les paths contenus dans un groupe dont l’id commence par "CIRCLE"
+    const circles = document.querySelectorAll('g[id^="CIRCLE"] path');
+    let counter = 1;
+
+    circles.forEach(path => {
+        path.classList.add("circle-toggle"); // active le toggle
+        path.dataset.id = counter;           // ajoute data-id="1"... "20"
+        counter++;
+    });
+}
+
+// Lancer juste après l’insertion du SVG
+setTimeout(addAutoCircleIDs, 200);
+
+// Activer ensuite le toggle
+setTimeout(initCircleToggle, 500);
+   
 /* TOGGLE CIRCLES */
 function initCircleToggle() {
     document.querySelectorAll(".circle-toggle").forEach(c => {

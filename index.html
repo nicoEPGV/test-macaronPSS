@@ -62,28 +62,33 @@
       border-radius: 12px;
     }
 
-    /* ===============================
-       COULEUR GLOBALE DU LOGO
-       (tout sauf les cercles cliquables)
-       =============================== */
+    /* ==========================================
+       COULEUR GLOBALE DU LOGO (hors cercles)
+       ========================================== */
     svg path {
       fill: var(--logo-color);
       transition: fill 0.2s ease;
     }
 
-    /* ===============================
-       CERCLES CLIQUABLES (nouveau SVG)
-       =============================== */
+    /* ==========================================
+       CERCLES CLIQUABLES – VERSION DEFINITIVE
+       ========================================== */
     circle[id^="Rond_"] {
       cursor: pointer;
-      fill: none; /* cercle vide par défaut */
+
+      /* REND LA SURFACE CLIQUABLE */
+      fill: transparent;          /* ⚠️ PAS "none" */
+      pointer-events: all;
+
+      /* STYLE */
       stroke: var(--logo-color);
       stroke-width: 2;
+
       transition: fill 0.2s ease;
     }
 
     circle[id^="Rond_"].active {
-      fill: var(--logo-color); /* cercle rempli */
+      fill: var(--logo-color);
     }
   </style>
 </head>
@@ -92,7 +97,6 @@
 
   <h1>Personnalisation du logo</h1>
 
-  <!-- CONTROLES -->
   <div class="controls">
     <label for="colorSelect">
       Couleur du logo :
@@ -109,7 +113,6 @@
     <button id="downloadJPG">Télécharger en JPEG</button>
   </div>
 
-  <!-- LOGO -->
   <div class="logo-wrapper">
   <?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
@@ -469,7 +472,7 @@
 	
 		<circle id="Rond_5_CARDIO" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="153.609" cy="46.08" r="11.338"/>
 	
-		<ellipse id="Rond_1_EQUI" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="193.946" cy="154.999" rx="11.338" ry="11.358"/>
+		<circle id="Rond_1_EQUI" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="193.946" cy="154.999" rx="11.338" ry="11.358"/>
 	
 		<circle id="Rond_2_EQUI" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="193.946" cy="127.588" r="11.338"/>
 	
@@ -500,7 +503,7 @@
 		<circle id="Rond_5_SOUP" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="153.609" cy="193" r="11.338"/>
 </g>
 </svg>
-	  
+
   </div>
 
   <script>
@@ -509,18 +512,14 @@
     const downloadJPG = document.getElementById('downloadJPG');
     const svg = document.querySelector('svg');
 
-    /* ===============================
-       CHANGEMENT DE COULEUR
-       =============================== */
+    /* COULEUR GLOBALE */
     colorSelect.addEventListener('change', () => {
       document.documentElement
         .style
         .setProperty('--logo-color', colorSelect.value);
     });
 
-    /* ===============================
-       CERCLES CLIQUABLES
-       =============================== */
+    /* CERCLES CLIQUABLES */
     const cercles = document.querySelectorAll('circle[id^="Rond_"]');
 
     cercles.forEach(cercle => {
@@ -529,9 +528,7 @@
       });
     });
 
-    /* ===============================
-       EXPORT PNG / JPEG
-       =============================== */
+    /* EXPORT PNG / JPEG */
     function exportImage(type) {
       const serializer = new XMLSerializer();
       const svgBlob = new Blob(
@@ -546,7 +543,6 @@
         const canvas = document.createElement('canvas');
         canvas.width = svg.viewBox.baseVal.width;
         canvas.height = svg.viewBox.baseVal.height;
-
         const ctx = canvas.getContext('2d');
 
         if (type === 'jpg') {
@@ -581,4 +577,3 @@
 
 </body>
 </html>
-``

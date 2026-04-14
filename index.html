@@ -7,7 +7,7 @@
 
   <style>
     :root {
-      --logo-color: #473AA5; /* Violet intense par défaut */
+      --logo-color: #473AA5;
     }
 
     body {
@@ -16,10 +16,6 @@
       padding: 2rem;
       background: #f6f6f7;
       color: #222;
-    }
-
-    h1 {
-      margin-bottom: 1rem;
     }
 
     .controls {
@@ -50,10 +46,6 @@
       cursor: pointer;
     }
 
-    button:hover {
-      opacity: 0.85;
-    }
-
     .logo-wrapper {
       max-width: 360px;
       margin: auto;
@@ -62,29 +54,17 @@
       border-radius: 12px;
     }
 
-    /* ==========================================
-       COULEUR GLOBALE DU LOGO (hors cercles)
-       ========================================== */
+    /* Logo principal */
     svg path {
       fill: var(--logo-color);
-      transition: fill 0.2s ease;
     }
 
-    /* ==========================================
-       CERCLES CLIQUABLES – VERSION DEFINITIVE
-       ========================================== */
+    /* Cercles cliquables */
     circle[id^="Rond_"] {
       cursor: pointer;
-
-      /* REND LA SURFACE CLIQUABLE */
-      fill: transparent;          /* ⚠️ PAS "none" */
-      pointer-events: all;
-
-      /* STYLE */
+      fill: transparent;
       stroke: var(--logo-color);
       stroke-width: 2;
-
-      transition: fill 0.2s ease;
     }
 
     circle[id^="Rond_"].active {
@@ -95,11 +75,9 @@
 
 <body>
 
-  <h1>Personnalisation du logo</h1>
-
   <div class="controls">
-    <label for="colorSelect">
-      Couleur du logo :
+    <label>
+      Couleur :
       <select id="colorSelect">
         <option value="#FF9400">Jaune énergie</option>
         <option value="#B9009D">Pourpre agile</option>
@@ -109,8 +87,8 @@
       </select>
     </label>
 
-    <button id="downloadPNG">Télécharger en PNG</button>
-    <button id="downloadJPG">Télécharger en JPEG</button>
+    <button id="downloadPNG">PNG</button>
+    <button id="downloadJPG">JPEG</button>
   </div>
 
   <div class="logo-wrapper">
@@ -505,35 +483,43 @@
 </svg>
 
 
-  </div>
-
   <script>
     const colorSelect = document.getElementById('colorSelect');
-    const downloadPNG = document.getElementById('downloadPNG');
-    const downloadJPG = document.getElementById('downloadJPG');
     const svg = document.querySelector('svg');
 
-    /* COULEUR GLOBALE */
     colorSelect.addEventListener('change', () => {
-      document.documentElement
-        .style
+      document.documentElement.style
         .setProperty('--logo-color', colorSelect.value);
     });
 
-    /* CERCLES CLIQUABLES */
-    const cercles = document.querySelectorAll('circle[id^="Rond_"]');
-
-    cercles.forEach(cercle => {
-      cercle.addEventListener('click', () => {
-        cercle.classList.toggle('active');
+    // Cercles cliquables
+    document
+      .querySelectorAll('circle[id^="Rond_"]')
+      .forEach(c => {
+        c.addEventListener('click', () => {
+          c.classList.toggle('active');
+        });
       });
-    });
 
-    /* EXPORT PNG / JPEG */
     function exportImage(type) {
+      const clone = svg.cloneNode(true);
+
+      // 🔥 APPLIQUER LES REMPLISSAGES AVANT EXPORT
+      clone.querySelectorAll('circle[id^="Rond_"]').forEach(circle => {
+        if (circle.classList.contains('active')) {
+          circle.setAttribute('fill', getComputedStyle(circle).stroke);
+        } else {
+          circle.setAttribute('fill', 'none');
+        }
+      });
+
+      clone.querySelectorAll('path').forEach(path => {
+        path.setAttribute('fill', getComputedStyle(path).fill);
+      });
+
       const serializer = new XMLSerializer();
       const svgBlob = new Blob(
-        [serializer.serializeToString(svg)],
+        [serializer.serializeToString(clone)],
         { type: 'image/svg+xml;charset=utf-8' }
       );
 
@@ -547,23 +533,18 @@
         const ctx = canvas.getContext('2d');
 
         if (type === 'jpg') {
-          ctx.fillStyle = '#ffffff';
+          ctx.fillStyle = '#fff';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         ctx.drawImage(img, 0, 0);
-
-        const colorName =
-          colorSelect.options[colorSelect.selectedIndex].text
-            .toLowerCase()
-            .replace(/\s+/g, '-');
 
         const link = document.createElement('a');
         link.href = canvas.toDataURL(
           type === 'png' ? 'image/png' : 'image/jpeg',
           0.95
         );
-        link.download = `logo-${colorName}.${type}`;
+        link.download = `logo.${type}`;
         link.click();
 
         URL.revokeObjectURL(url);
@@ -572,8 +553,8 @@
       img.src = url;
     }
 
-    downloadPNG.addEventListener('click', () => exportImage('png'));
-    downloadJPG.addEventListener('click', () => exportImage('jpg'));
+    document.getElementById('downloadPNG').onclick = () => exportImage('png');
+    document.getElementById('downloadJPG').onclick = () => exportImage('jpg');
   </script>
 
 </body>

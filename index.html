@@ -14,24 +14,40 @@
       font-family: system-ui, sans-serif;
       background: #f6f6f7;
       padding: 2rem;
+      color: #222;
     }
 
     .controls {
       display: flex;
-      gap: 1rem;
-      margin-bottom: 2rem;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
       flex-wrap: wrap;
-      align-items: center;
+      align-items: flex-start;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.95rem;
+      font-weight: 500;
     }
 
     select, button {
+      margin-top: 0.25rem;
       padding: 0.5rem 0.8rem;
       font-size: 1rem;
     }
 
+    #synonymesInfo {
+      margin-top: 0.25rem;
+      font-size: 0.85rem;
+      color: #555;
+      max-width: 400px;
+    }
+
     .logo-wrapper {
       max-width: 360px;
-      margin: auto;
+      margin: 2rem auto 0;
       background: white;
       padding: 1rem;
       border-radius: 12px;
@@ -68,13 +84,18 @@
   <!-- CONTROLES -->
   <div class="controls">
 
-    <label>
-      Activité / Programme :
-      <select id="activitySelect"></select>
-    </label>
+    <div>
+      <label>
+        Activité / Programme
+        <select id="activitySelect"></select>
+      </label>
+
+      <!-- ✅ SYNONYMES AFFICHÉS ICI -->
+      <div id="synonymesInfo"></div>
+    </div>
 
     <label>
-      Couleur :
+      Couleur du logo
       <select id="colorSelect">
         <option value="#FF9400">Jaune énergie</option>
         <option value="#B9009D">Pourpre agile</option>
@@ -84,13 +105,15 @@
       </select>
     </label>
 
-    <button id="downloadPNG">Télécharger PNG</button>
-    <button id="downloadJPG">Télécharger JPEG</button>
+    <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+      <button id="downloadPNG">PNG</button>
+      <button id="downloadJPG">JPEG</button>
+    </div>
   </div>
 
   <!-- LOGO -->
   <div class="logo-wrapper">
-   <?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -483,16 +506,17 @@
   </div>
 
 
-  <!-- ✅ SCRIPT MODULE (OBLIGATOIREMENT ICI, EN FIN DE BODY) -->
+  <!-- ✅ SCRIPT MODULE -->
   <script type="module">
     import { ACTIVITIES } from "./activities.js";
 
     const activitySelect = document.getElementById("activitySelect");
     const colorSelect = document.getElementById("colorSelect");
+    const synonymesInfo = document.getElementById("synonymesInfo");
     const svg = document.querySelector("svg");
 
     /* ======================================================
-       GÉNÉRATION AUTOMATIQUE DU MENU ACTIVITÉ
+       MENU ACTIVITÉ (AUTO)
        ====================================================== */
     function generateActivityMenu() {
       activitySelect.innerHTML = "";
@@ -505,6 +529,21 @@
           option.textContent = activity.label;
           activitySelect.appendChild(option);
         });
+    }
+
+    /* ======================================================
+       SYNONYMES
+       ====================================================== */
+    function updateSynonymes(activityKey) {
+      const activity = ACTIVITIES[activityKey];
+
+      if (activity.synonymes && activity.synonymes.length > 0) {
+        synonymesInfo.innerHTML =
+          "<strong>Autres appellations :</strong> " +
+          activity.synonymes.join(" · ");
+      } else {
+        synonymesInfo.innerHTML = "";
+      }
     }
 
     /* ======================================================
@@ -524,18 +563,18 @@
        LOGIQUE MÉTIER
        ====================================================== */
     function resetCercles() {
-      cercles.forEach(c => {
-        c.classList.remove("active", "circle-disabled");
-      });
+      cercles.forEach(c =>
+        c.classList.remove("active", "circle-disabled")
+      );
     }
 
     function applyPresets(presets) {
       Object.entries(presets).forEach(([zone, count]) => {
-        const zoneCircles = document.querySelectorAll(
+        const zoneCercles = document.querySelectorAll(
           `circle[id$="_${zone}"]`
         );
 
-        zoneCircles.forEach((cercle, index) => {
+        zoneCercles.forEach((cercle, index) => {
           cercle.classList.add("circle-disabled");
           if (index < count) {
             cercle.classList.add("active");
@@ -576,9 +615,9 @@
       const couleur = getComputedStyle(document.documentElement)
         .getPropertyValue("--logo-color").trim();
 
-      clone.querySelectorAll("path").forEach(p => {
-        p.setAttribute("fill", couleur);
-      });
+      clone.querySelectorAll("path").forEach(p =>
+        p.setAttribute("fill", couleur)
+      );
 
       clone.querySelectorAll('circle[id^="Rond_"]').forEach(c => {
         c.setAttribute("stroke", couleur);
@@ -625,7 +664,6 @@
 
     document.getElementById("downloadPNG")
       .addEventListener("click", () => exportImage("png"));
-
     document.getElementById("downloadJPG")
       .addEventListener("click", () => exportImage("jpg"));
 
@@ -634,12 +672,14 @@
        ====================================================== */
     generateActivityMenu();
     applyActivity(activitySelect.value);
+    updateSynonymes(activitySelect.value);
 
     activitySelect.addEventListener("change", e => {
-      applyActivity(e.target.value);
+      const key = e.target.value;
+      applyActivity(key);
+      updateSynonymes(key);
     });
   </script>
 
 </body>
 </html>
-

@@ -69,22 +69,20 @@
       fill: var(--logo-color);
       transition: fill 0.2s ease;
     }
+/* ===============================
+   CERCLES CLIQUABLES – CORRECTION
+   =============================== */
+[id^="Rond_"] {
+  cursor: pointer;
+  transition: fill 0.2s ease;
+  stroke: var(--logo-color);
+  stroke-width: 2;
+  fill: transparent; /* état initial vide */
+}
 
-    /* ===============================
-       CERCLES CLIQUABLES
-       =============================== */
-    [id^="Rond_"] {
-      cursor: pointer;
-      transition: fill-opacity 0.2s ease;
-    }
-
-    [id^="Rond_"].inactive {
-      fill-opacity: 0;
-    }
-
-    [id^="Rond_"].active {
-      fill-opacity: 1;
-    }
+[id^="Rond_"].active {
+  fill: var(--logo-color); /* rempli */
+}
   </style>
 </head>
 

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Logo interactif – Générateur</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>Configurateur de logo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
   <style>
     :root {
@@ -11,11 +11,9 @@
     }
 
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      margin: 0;
-      padding: 2rem;
+      font-family: system-ui, sans-serif;
       background: #f6f6f7;
-      color: #222;
+      padding: 2rem;
     }
 
     .controls {
@@ -26,44 +24,29 @@
       align-items: center;
     }
 
-    label {
-      font-weight: 500;
-    }
-
-    select {
-      padding: 0.5rem 0.75rem;
+    select, button {
+      padding: 0.5rem 0.8rem;
       font-size: 1rem;
-      margin-left: 0.5rem;
-    }
-
-    button {
-      padding: 0.5rem 0.9rem;
-      font-size: 0.95rem;
-      border-radius: 6px;
-      border: none;
-      background: #222;
-      color: #fff;
-      cursor: pointer;
     }
 
     .logo-wrapper {
       max-width: 360px;
-      margin: auto;
       background: white;
       padding: 1rem;
       border-radius: 12px;
+      margin: auto;
     }
 
-    /* Logo principal */
+    /* LOGO */
     svg path {
       fill: var(--logo-color);
     }
 
-    /* Cercles cliquables */
+    /* CERCLES */
     circle[id^="Rond_"] {
       cursor: pointer;
-      fill: transparent;
-      stroke: var(--logo-color);
+      fill: transparent;          /* surface cliquable */
+      stroke: var(--logo-color);  /* contour */
       stroke-width: 2;
     }
 
@@ -75,24 +58,24 @@
 
 <body>
 
-  <div class="controls">
-    <label>
-      Couleur :
-      <select id="colorSelect">
-        <option value="#FF9400">Jaune énergie</option>
-        <option value="#B9009D">Pourpre agile</option>
-        <option value="#FF0C6A">Rose tonus</option>
-        <option value="#473AA5" selected>Violet intense</option>
-        <option value="#919CFF">Bleu Flex</option>
-      </select>
-    </label>
+<div class="controls">
+  <label>
+    Couleur :
+    <select id="colorSelect">
+      <option value="#FF9400">Jaune énergie</option>
+      <option value="#B9009D">Pourpre agile</option>
+      <option value="#FF0C6A">Rose tonus</option>
+      <option value="#473AA5" selected>Violet intense</option>
+      <option value="#919CFF">Bleu Flex</option>
+    </select>
+  </label>
 
-    <button id="downloadPNG">PNG</button>
-    <button id="downloadJPG">JPEG</button>
-  </div>
+  <button id="downloadPNG">Télécharger PNG</button>
+  <button id="downloadJPG">Télécharger JPEG</button>
+</div>
 
-  <div class="logo-wrapper">
- <?xml version="1.0" encoding="utf-8"?>
+<div class="logo-wrapper">
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -482,80 +465,92 @@
 </g>
 </svg>
 
+</div>
 
-  <script>
-    const colorSelect = document.getElementById('colorSelect');
-    const svg = document.querySelector('svg');
+<script>
+  const colorSelect = document.getElementById('colorSelect');
+  const svg = document.querySelector('svg');
 
-    colorSelect.addEventListener('change', () => {
-      document.documentElement.style
-        .setProperty('--logo-color', colorSelect.value);
+  // Couleur dynamique à l’écran
+  colorSelect.addEventListener('change', () => {
+    document.documentElement.style
+      .setProperty('--logo-color', colorSelect.value);
+  });
+
+  // Cercles cliquables
+  document.querySelectorAll('circle[id^="Rond_"]').forEach(cercle => {
+    cercle.addEventListener('click', () => {
+      cercle.classList.toggle('active');
+    });
+  });
+
+  /* ===============================
+     EXPORT FIDÈLE
+     =============================== */
+  function exportImage(type) {
+    const clone = svg.cloneNode(true);
+    const couleur = getComputedStyle(document.documentElement)
+      .getPropertyValue('--logo-color')
+      .trim();
+
+    // 🔒 Figer les paths du logo
+    clone.querySelectorAll('path').forEach(path => {
+      path.setAttribute('fill', couleur);
     });
 
-    // Cercles cliquables
-    document
-      .querySelectorAll('circle[id^="Rond_"]')
-      .forEach(c => {
-        c.addEventListener('click', () => {
-          c.classList.toggle('active');
-        });
-      });
+    // 🔒 Figer les cercles
+    clone.querySelectorAll('circle[id^="Rond_"]').forEach(circle => {
+      circle.setAttribute('stroke', couleur);
 
-    function exportImage(type) {
-      const clone = svg.cloneNode(true);
+      if (circle.classList.contains('active')) {
+        circle.setAttribute('fill', couleur);
+      } else {
+        circle.setAttribute('fill', 'none');
+      }
+    });
 
-      // 🔥 APPLIQUER LES REMPLISSAGES AVANT EXPORT
-      clone.querySelectorAll('circle[id^="Rond_"]').forEach(circle => {
-        if (circle.classList.contains('active')) {
-          circle.setAttribute('fill', getComputedStyle(circle).stroke);
-        } else {
-          circle.setAttribute('fill', 'none');
-        }
-      });
+    const serializer = new XMLSerializer();
+    const blob = new Blob(
+      [serializer.serializeToString(clone)],
+      { type: 'image/svg+xml;charset=utf-8' }
+    );
 
-      clone.querySelectorAll('path').forEach(path => {
-        path.setAttribute('fill', getComputedStyle(path).fill);
-      });
+    const img = new Image();
+    const url = URL.createObjectURL(blob);
 
-      const serializer = new XMLSerializer();
-      const svgBlob = new Blob(
-        [serializer.serializeToString(clone)],
-        { type: 'image/svg+xml;charset=utf-8' }
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = svg.viewBox.baseVal.width;
+      canvas.height = svg.viewBox.baseVal.height;
+      const ctx = canvas.getContext('2d');
+
+      if (type === 'jpg') {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      ctx.drawImage(img, 0, 0);
+
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL(
+        type === 'png' ? 'image/png' : 'image/jpeg',
+        0.95
       );
+      a.download = `logo-${couleur.replace('#','')}.${type}`;
+      a.click();
 
-      const url = URL.createObjectURL(svgBlob);
-      const img = new Image();
+      URL.revokeObjectURL(url);
+    };
 
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = svg.viewBox.baseVal.width;
-        canvas.height = svg.viewBox.baseVal.height;
-        const ctx = canvas.getContext('2d');
+    img.src = url;
+  }
 
-        if (type === 'jpg') {
-          ctx.fillStyle = '#fff';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
+  document.getElementById('downloadPNG')
+    .addEventListener('click', () => exportImage('png'));
 
-        ctx.drawImage(img, 0, 0);
-
-        const link = document.createElement('a');
-        link.href = canvas.toDataURL(
-          type === 'png' ? 'image/png' : 'image/jpeg',
-          0.95
-        );
-        link.download = `logo.${type}`;
-        link.click();
-
-        URL.revokeObjectURL(url);
-      };
-
-      img.src = url;
-    }
-
-    document.getElementById('downloadPNG').onclick = () => exportImage('png');
-    document.getElementById('downloadJPG').onclick = () => exportImage('jpg');
-  </script>
+  document.getElementById('downloadJPG')
+    .addEventListener('click', () => exportImage('jpg'));
+</script>
 
 </body>
 </html>

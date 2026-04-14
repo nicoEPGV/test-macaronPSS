@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -6,9 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
-    :root {
-      --logo-color: #473AA5;
-    }
+    :root { --logo-color: #473AA5; }
 
     body {
       font-family: system-ui, sans-serif;
@@ -53,9 +52,7 @@
       border-radius: 12px;
     }
 
-    svg path {
-      fill: var(--logo-color);
-    }
+    svg path { fill: var(--logo-color); }
 
     circle[id^="Rond_"] {
       cursor: pointer;
@@ -65,9 +62,7 @@
       transition: opacity 0.2s ease, fill 0.2s ease;
     }
 
-    circle[id^="Rond_"].active {
-      fill: var(--logo-color);
-    }
+    circle[id^="Rond_"].active { fill: var(--logo-color); }
 
     .circle-disabled {
       opacity: 0.25;
@@ -79,39 +74,33 @@
 
 <body>
 
-  <!-- CONTROLES -->
-  <div class="controls">
+<!-- CONTROLES -->
+<div class="controls">
 
-    <div>
-      <label>
-        Activité / Programme
-        <select id="activitySelect"></select>
-      </label>
-      <div id="synonymesInfo"></div>
-    </div>
-
+  <div>
     <label>
-      Couleur du logo
-      <select id="colorSelect">
-        <option value="#FF9400">Jaune énergie</option>
-        <option value="#B9009D">Pourpre agile</option>
-        <option value="#FF0C6A">Rose tonus</option>
-        <option value="#473AA5" selected>Violet intense</option>
-        <option value="#919CFF">Bleu Flex</option>
-      </select>
+      Activité / Programme
+      <select id="activitySelect"></select>
     </label>
-
-    <div style="display:flex; gap:0.5rem; align-items:flex-end;">
-      <button id="downloadPNG">PNG</button>
-      <button id="downloadJPG">JPEG</button>
-    </div>
+    <div id="synonymesInfo"></div>
   </div>
 
-  <!-- LOGO -->
-  <div class="logo-wrapper">
-   <?xml version="1.0" encoding="utf-8"?>
+  <label>
+    Couleur du logo
+    <select id="colorSelect">
+      <option value="#FF9400">Jaune énergie</option>
+      <option value="#B9009D">Pourpre agile</option>
+      <option value="#FF0C6A">Rose tonus</option>
+      <option value="#473AA5" selected>Violet intense</option>
+      <option value="#919CFF">Bleu Flex</option>
+    </select>
+  </label>
+
+</div>
+
+<!-- LOGO -->
+<div class="logo-wrapper">
 <!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="356px" height="356px" viewBox="0 0 356 356" enable-background="new 0 0 356 356" xml:space="preserve">
 <g id="PAS_CLIQUABLE">
@@ -498,170 +487,94 @@
 		<circle id="Rond_5_SOUP" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="153.609" cy="193" r="11.338"/>
 </g>
 </svg>
+</div>
 
-  </div>
+<!-- SCRIPT -->
+<script type="module">
+  import { ACTIVITIES } from "./activities.js";
 
-  <!-- ✅ SCRIPT MODULE SÉCURISÉ -->
-  <script type="module">
-    import { ACTIVITIES } from "./activities.js";
+  document.addEventListener("DOMContentLoaded", () => {
 
-    document.addEventListener("DOMContentLoaded", () => {
+    const activitySelect = document.getElementById("activitySelect");
+    const colorSelect = document.getElementById("colorSelect");
+    const synonymesInfo = document.getElementById("synonymesInfo");
+    const svg = document.querySelector("svg");
 
-      const activitySelect = document.getElementById("activitySelect");
-      const colorSelect = document.getElementById("colorSelect");
-      const synonymesInfo = document.getElementById("synonymesInfo");
-      const svg = document.querySelector("svg");
+    function generateActivityMenu() {
+      activitySelect.innerHTML = "";
+      Object.entries(ACTIVITIES)
+        .sort((a, b) => a[1].label.localeCompare(b[1].label, "fr"))
+        .forEach(([key, activity]) => {
+          const opt = document.createElement("option");
+          opt.value = key;
+          opt.textContent = activity.label;
+          activitySelect.appendChild(opt);
+        });
+    }
 
-      if (!activitySelect) return;
-
-      /* ===============================
-         MENU ACTIVITÉ
-         =============================== */
-      function generateActivityMenu() {
-        activitySelect.innerHTML = "";
-
-        Object.entries(ACTIVITIES)
-          .sort((a, b) => a[1].label.localeCompare(b[1].label, "fr"))
-          .forEach(([key, activity]) => {
-            const opt = document.createElement("option");
-            opt.value = key;
-            opt.textContent = activity.label;
-            activitySelect.appendChild(opt);
-          });
+    function updateSynonymes(key) {
+      const act = ACTIVITIES[key];
+      if (act.synonymes && act.synonymes.length) {
+        synonymesInfo.innerHTML =
+          "<strong>Autres appellations :</strong> " +
+          act.synonymes.join(" · ");
+      } else {
+        synonymesInfo.innerHTML = "";
       }
+    }
 
-      /* ===============================
-         SYNONYMES
-         =============================== */
-      function updateSynonymes(key) {
-        const act = ACTIVITIES[key];
-        if (act.synonymes && act.synonymes.length) {
-          synonymesInfo.innerHTML =
-            "<strong>Autres appellations :</strong> " +
-            act.synonymes.join(" · ");
-        } else {
-          synonymesInfo.innerHTML = "";
+    const cercles = document.querySelectorAll('circle[id^="Rond_"]');
+
+    cercles.forEach(c => {
+      c.addEventListener("click", () => {
+        if (!c.classList.contains("circle-disabled")) {
+          c.classList.toggle("active");
         }
-      }
-
-      /* ===============================
-         CERCLES
-         =============================== */
-      const cercles = document.querySelectorAll('circle[id^="Rond_"]');
-
-      cercles.forEach(c => {
-        c.addEventListener("click", () => {
-          if (!c.classList.contains("circle-disabled")) {
-            c.classList.toggle("active");
-          }
-        });
       });
-
-      function resetCercles() {
-        cercles.forEach(c => c.classList.remove("active", "circle-disabled"));
-      }
-
-      function applyPresets(presets) {
-        Object.entries(presets).forEach(([zone, count]) => {
-          document
-            .querySelectorAll(`circle[id$="_${zone}"]`)
-            .forEach((c, i) => {
-              c.classList.add("circle-disabled");
-              if (i < count) c.classList.add("active");
-            });
-        });
-      }
-
-      function applyActivity(key) {
-        resetCercles();
-        applyPresets(ACTIVITIES[key].presets);
-
-        cercles.forEach(c => {
-          const zone = c.id.split("_").pop();
-          if (ACTIVITIES[key].editableZones.includes(zone)) {
-            c.classList.remove("circle-disabled");
-          }
-        });
-      }
-
-      /* ===============================
-         COULEUR
-         =============================== */
-      colorSelect.addEventListener("change", () => {
-        document.documentElement
-          .style.setProperty("--logo-color", colorSelect.value);
-      });
-
-      /* ===============================
-         EXPORT
-         =============================== */
-      function exportImage(type) {
-        if (!svg) return;
-
-        const clone = svg.cloneNode(true);
-        const couleur = getComputedStyle(document.documentElement)
-          .getPropertyValue("--logo-color");
-
-        clone.querySelectorAll("path").forEach(p => p.setAttribute("fill", couleur));
-        clone.querySelectorAll("circle").forEach(c => {
-          c.setAttribute("stroke", couleur);
-          c.setAttribute("fill", c.classList.contains("active") ? couleur : "none");
-        });
-
-        const serializer = new XMLSerializer();
-        const blob = new Blob(
-          [serializer.serializeToString(clone)],
-          { type: "image/svg+xml;charset=utf-8" }
-        );
-
-        const img = new Image();
-        const url = URL.createObjectURL(blob);
-
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = svg.viewBox.baseVal.width;
-          canvas.height = svg.viewBox.baseVal.height;
-          const ctx = canvas.getContext("2d");
-
-          if (type === "jpg") {
-            ctx.fillStyle = "#fff";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-          }
-
-          ctx.drawImage(img, 0, 0);
-          const a = document.createElement("a");
-          a.href = canvas.toDataURL(
-            type === "png" ? "image/png" : "image/jpeg", 0.95
-          );
-          a.download = `logo-${activitySelect.value}.${type}`;
-          a.click();
-
-          URL.revokeObjectURL(url);
-        };
-
-        img.src = url;
-      }
-
-      document.getElementById("downloadPNG")
-        .addEventListener("click", () => exportImage("png"));
-      document.getElementById("downloadJPG")
-        .addEventListener("click", () => exportImage("jpg"));
-
-      /* ===============================
-         INIT
-         =============================== */
-      generateActivityMenu();
-      applyActivity(activitySelect.value);
-      updateSynonymes(activitySelect.value);
-
-      activitySelect.addEventListener("change", e => {
-        applyActivity(e.target.value);
-        updateSynonymes(e.target.value);
-      });
-
     });
-  </script>
+
+    function resetCercles() {
+      cercles.forEach(c => c.classList.remove("active", "circle-disabled"));
+    }
+
+    function applyPresets(presets) {
+      Object.entries(presets).forEach(([zone, count]) => {
+        document.querySelectorAll(`circle[id$="_${zone}"]`)
+          .forEach((c, i) => {
+            c.classList.add("circle-disabled");
+            if (i < count) c.classList.add("active");
+          });
+      });
+    }
+
+    function applyActivity(key) {
+      resetCercles();
+      applyPresets(ACTIVITIES[key].presets);
+      cercles.forEach(c => {
+        const zone = c.id.split("_").pop();
+        if (ACTIVITIES[key].editableZones.includes(zone)) {
+          c.classList.remove("circle-disabled");
+        }
+      });
+    }
+
+    colorSelect.addEventListener("change", () => {
+      document.documentElement.style
+        .setProperty("--logo-color", colorSelect.value);
+    });
+
+    generateActivityMenu();
+    applyActivity(activitySelect.value);
+    updateSynonymes(activitySelect.value);
+
+    activitySelect.addEventListener("change", e => {
+      applyActivity(e.target.value);
+      updateSynonymes(e.target.value);
+    });
+
+  });
+</script>
 
 </body>
 </html>
-``
+

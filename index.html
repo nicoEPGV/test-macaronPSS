@@ -1,59 +1,48 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Configurateur de logo EPGV</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
   <style>
-    :root { --logo-color: #473AA5; }
+    :root {
+      --logo-color: #473AA5;
+    }
 
     body {
       font-family: system-ui, sans-serif;
       background: #f6f6f7;
       padding: 2rem;
-      color: #222;
     }
 
     .controls {
       display: flex;
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
+      gap: 1rem;
+      margin-bottom: 2rem;
       flex-wrap: wrap;
-      align-items: flex-start;
-    }
-
-    label {
-      display: flex;
-      flex-direction: column;
-      font-size: 0.95rem;
-      font-weight: 500;
+      align-items: center;
     }
 
     select, button {
-      margin-top: 0.25rem;
-      padding: 0.45rem 0.7rem;
+      padding: 0.5rem 0.8rem;
       font-size: 1rem;
-    }
-
-    #synonymesInfo {
-      margin-top: 0.3rem;
-      font-size: 0.85rem;
-      color: #555;
-      max-width: 420px;
     }
 
     .logo-wrapper {
       max-width: 360px;
-      margin: 2rem auto 0;
+      margin: auto;
       background: white;
       padding: 1rem;
       border-radius: 12px;
     }
 
-    svg path { fill: var(--logo-color); }
+    /* Logo */
+    svg path {
+      fill: var(--logo-color);
+    }
 
+    /* Cercles */
     circle[id^="Rond_"] {
       cursor: pointer;
       fill: transparent;
@@ -62,7 +51,9 @@
       transition: opacity 0.2s ease, fill 0.2s ease;
     }
 
-    circle[id^="Rond_"].active { fill: var(--logo-color); }
+    circle[id^="Rond_"].active {
+      fill: var(--logo-color);
+    }
 
     .circle-disabled {
       opacity: 0.25;
@@ -74,33 +65,34 @@
 
 <body>
 
-<!-- CONTROLES -->
-<div class="controls">
+  <!-- CONTROLES -->
+  <div class="controls">
 
-  <div>
     <label>
-      Activité / Programme
+      Activité / Programme :
       <select id="activitySelect"></select>
     </label>
-    <div id="synonymesInfo"></div>
+
+    <label>
+      Couleur :
+      <select id="colorSelect">
+        <option value="#FF9400">Jaune énergie</option>
+        <option value="#B9009D">Pourpre agile</option>
+        <option value="#FF0C6A">Rose tonus</option>
+        <option value="#473AA5" selected>Violet intense</option>
+        <option value="#919CFF">Bleu Flex</option>
+      </select>
+    </label>
+
+    <button id="downloadPNG">Télécharger PNG</button>
+    <button id="downloadJPG">Télécharger JPEG</button>
   </div>
 
-  <label>
-    Couleur du logo
-    <select id="colorSelect">
-      <option value="#FF9400">Jaune énergie</option>
-      <option value="#B9009D">Pourpre agile</option>
-      <option value="#FF0C6A">Rose tonus</option>
-      <option value="#473AA5" selected>Violet intense</option>
-      <option value="#919CFF">Bleu Flex</option>
-    </select>
-  </label>
-
-</div>
-
-<!-- LOGO -->
-<div class="logo-wrapper">
+  <!-- LOGO -->
+  <div class="logo-wrapper">
+   <?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="356px" height="356px" viewBox="0 0 356 356" enable-background="new 0 0 356 356" xml:space="preserve">
 <g id="PAS_CLIQUABLE">
@@ -487,94 +479,168 @@
 		<circle id="Rond_5_SOUP" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="153.609" cy="193" r="11.338"/>
 </g>
 </svg>
-</div>
 
-<!-- SCRIPT -->
-<script type="module">
-  import { ACTIVITIES } from "./activities.js";
+  </div>
 
-  document.addEventListener("DOMContentLoaded", () => {
+
+  <!-- ✅ SCRIPT MODULE (OBLIGATOIREMENT ICI, EN FIN DE BODY) -->
+  <script type="module">
+    import { ACTIVITIES } from "./activities.js";
 
     const activitySelect = document.getElementById("activitySelect");
     const colorSelect = document.getElementById("colorSelect");
-    const synonymesInfo = document.getElementById("synonymesInfo");
     const svg = document.querySelector("svg");
 
+    /* ======================================================
+       GÉNÉRATION AUTOMATIQUE DU MENU ACTIVITÉ
+       ====================================================== */
     function generateActivityMenu() {
       activitySelect.innerHTML = "";
+
       Object.entries(ACTIVITIES)
         .sort((a, b) => a[1].label.localeCompare(b[1].label, "fr"))
         .forEach(([key, activity]) => {
-          const opt = document.createElement("option");
-          opt.value = key;
-          opt.textContent = activity.label;
-          activitySelect.appendChild(opt);
+          const option = document.createElement("option");
+          option.value = key;
+          option.textContent = activity.label;
+          activitySelect.appendChild(option);
         });
     }
 
-    function updateSynonymes(key) {
-      const act = ACTIVITIES[key];
-      if (act.synonymes && act.synonymes.length) {
-        synonymesInfo.innerHTML =
-          "<strong>Autres appellations :</strong> " +
-          act.synonymes.join(" · ");
-      } else {
-        synonymesInfo.innerHTML = "";
-      }
-    }
-
+    /* ======================================================
+       CERCLES
+       ====================================================== */
     const cercles = document.querySelectorAll('circle[id^="Rond_"]');
 
-    cercles.forEach(c => {
-      c.addEventListener("click", () => {
-        if (!c.classList.contains("circle-disabled")) {
-          c.classList.toggle("active");
+    cercles.forEach(cercle => {
+      cercle.addEventListener("click", () => {
+        if (!cercle.classList.contains("circle-disabled")) {
+          cercle.classList.toggle("active");
         }
       });
     });
 
+    /* ======================================================
+       LOGIQUE MÉTIER
+       ====================================================== */
     function resetCercles() {
-      cercles.forEach(c => c.classList.remove("active", "circle-disabled"));
+      cercles.forEach(c => {
+        c.classList.remove("active", "circle-disabled");
+      });
     }
 
     function applyPresets(presets) {
       Object.entries(presets).forEach(([zone, count]) => {
-        document.querySelectorAll(`circle[id$="_${zone}"]`)
-          .forEach((c, i) => {
-            c.classList.add("circle-disabled");
-            if (i < count) c.classList.add("active");
-          });
+        const zoneCircles = document.querySelectorAll(
+          `circle[id$="_${zone}"]`
+        );
+
+        zoneCircles.forEach((cercle, index) => {
+          cercle.classList.add("circle-disabled");
+          if (index < count) {
+            cercle.classList.add("active");
+          }
+        });
       });
     }
 
-    function applyActivity(key) {
+    function applyActivity(activityKey) {
+      const activity = ACTIVITIES[activityKey];
+
       resetCercles();
-      applyPresets(ACTIVITIES[key].presets);
-      cercles.forEach(c => {
-        const zone = c.id.split("_").pop();
-        if (ACTIVITIES[key].editableZones.includes(zone)) {
-          c.classList.remove("circle-disabled");
+      applyPresets(activity.presets);
+
+      cercles.forEach(cercle => {
+        const zone = cercle.id.split("_").pop();
+        if (activity.editableZones.includes(zone)) {
+          cercle.classList.remove("circle-disabled");
+        } else {
+          cercle.classList.add("circle-disabled");
         }
       });
     }
 
+    /* ======================================================
+       COULEUR
+       ====================================================== */
     colorSelect.addEventListener("change", () => {
-      document.documentElement.style
-        .setProperty("--logo-color", colorSelect.value);
+      document.documentElement
+        .style.setProperty("--logo-color", colorSelect.value);
     });
 
+    /* ======================================================
+       EXPORT
+       ====================================================== */
+    function exportImage(type) {
+      const clone = svg.cloneNode(true);
+      const couleur = getComputedStyle(document.documentElement)
+        .getPropertyValue("--logo-color").trim();
+
+      clone.querySelectorAll("path").forEach(p => {
+        p.setAttribute("fill", couleur);
+      });
+
+      clone.querySelectorAll('circle[id^="Rond_"]').forEach(c => {
+        c.setAttribute("stroke", couleur);
+        c.setAttribute(
+          "fill",
+          c.classList.contains("active") ? couleur : "none"
+        );
+      });
+
+      const serializer = new XMLSerializer();
+      const blob = new Blob(
+        [serializer.serializeToString(clone)],
+        { type: "image/svg+xml;charset=utf-8" }
+      );
+
+      const img = new Image();
+      const url = URL.createObjectURL(blob);
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = svg.viewBox.baseVal.width;
+        canvas.height = svg.viewBox.baseVal.height;
+        const ctx = canvas.getContext("2d");
+
+        if (type === "jpg") {
+          ctx.fillStyle = "#fff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        ctx.drawImage(img, 0, 0);
+
+        const a = document.createElement("a");
+        a.href = canvas.toDataURL(
+          type === "png" ? "image/png" : "image/jpeg", 0.95
+        );
+        a.download = `logo-${activitySelect.value}.${type}`;
+        a.click();
+
+        URL.revokeObjectURL(url);
+      };
+
+      img.src = url;
+    }
+
+    document.getElementById("downloadPNG")
+      .addEventListener("click", () => exportImage("png"));
+
+    document.getElementById("downloadJPG")
+      .addEventListener("click", () => exportImage("jpg"));
+
+    /* ======================================================
+       INITIALISATION
+       ====================================================== */
     generateActivityMenu();
     applyActivity(activitySelect.value);
-    updateSynonymes(activitySelect.value);
 
     activitySelect.addEventListener("change", e => {
       applyActivity(e.target.value);
-      updateSynonymes(e.target.value);
     });
-
-  });
-</script>
+  </script>
 
 </body>
 </html>
+
 

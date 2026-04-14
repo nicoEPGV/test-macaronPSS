@@ -69,20 +69,22 @@
       fill: var(--logo-color);
       transition: fill 0.2s ease;
     }
-/* ===============================
-   CERCLES CLIQUABLES – CORRECTION
-   =============================== */
-[id^="Rond_"] {
-  cursor: pointer;
-  transition: fill 0.2s ease;
-  stroke: var(--logo-color);
-  stroke-width: 2;
-  fill: transparent; /* état initial vide */
-}
 
-[id^="Rond_"].active {
-  fill: var(--logo-color); /* rempli */
-}
+    /* ===============================
+       CERCLES CLIQUABLES – VERSION CORRECTE
+       (fonctionne avec TON SVG actuel)
+       =============================== */
+    [id^="Rond_"] {
+      cursor: pointer;
+      stroke: var(--logo-color);
+      stroke-width: 2;
+      fill: transparent; /* cercle vide par défaut */
+      transition: fill 0.2s ease;
+    }
+
+    [id^="Rond_"].active {
+      fill: var(--logo-color); /* cercle rempli */
+    }
   </style>
 </head>
 
@@ -109,8 +111,7 @@
 
   <!-- LOGO -->
   <div class="logo-wrapper">
-
-  <?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -519,7 +520,6 @@
 		S200.073,205,194,205"/>
 </g>
 </svg>
-
   </div>
 
   <script>
@@ -529,7 +529,7 @@
     const svg = document.querySelector('svg');
 
     /* ===============================
-       CHANGEMENT DE COULEUR
+       CHANGEMENT DE COULEUR GLOBALE
        =============================== */
     colorSelect.addEventListener('change', () => {
       document.documentElement
@@ -543,12 +543,8 @@
     const cercles = document.querySelectorAll('[id^="Rond_"]');
 
     cercles.forEach(cercle => {
-      // état initial : vide
-      cercle.classList.add('inactive');
-
       cercle.addEventListener('click', () => {
         cercle.classList.toggle('active');
-        cercle.classList.toggle('inactive');
       });
     });
 
@@ -608,3 +604,4 @@
 
 </body>
 </html>
+``

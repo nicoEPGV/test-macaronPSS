@@ -7,7 +7,7 @@
 
   <style>
     :root {
-      --logo-color: #473AA5;
+      --logo-color: #473AA5; /* Violet intense par défaut */
     }
 
     body {
@@ -64,31 +64,26 @@
 
     /* ===============================
        COULEUR GLOBALE DU LOGO
-       (EXCLUT LES CERCLES)
+       (tout sauf les cercles cliquables)
        =============================== */
-    svg path:not([id^="Rond_"]) {
+    svg path {
       fill: var(--logo-color);
       transition: fill 0.2s ease;
     }
 
     /* ===============================
-       CERCLES CLIQUABLES (UX CORRECTE)
+       CERCLES CLIQUABLES (nouveau SVG)
        =============================== */
-    [id^="Rond_"] {
+    circle[id^="Rond_"] {
       cursor: pointer;
-
-      /* visuel */
+      fill: none; /* cercle vide par défaut */
       stroke: var(--logo-color);
       stroke-width: 2;
-      fill: rgba(0, 0, 0, 0.001); /* invisible mais cliquable */
-
-      /* interaction */
-      pointer-events: all;
       transition: fill 0.2s ease;
     }
 
-    [id^="Rond_"].active {
-      fill: var(--logo-color); /* REMPLI AU CLIC */
+    circle[id^="Rond_"].active {
+      fill: var(--logo-color); /* cercle rempli */
     }
   </style>
 </head>
@@ -97,6 +92,7 @@
 
   <h1>Personnalisation du logo</h1>
 
+  <!-- CONTROLES -->
   <div class="controls">
     <label for="colorSelect">
       Couleur du logo :
@@ -113,8 +109,9 @@
     <button id="downloadJPG">Télécharger en JPEG</button>
   </div>
 
+  <!-- LOGO -->
   <div class="logo-wrapper">
-  <?xml version="1.0" encoding="utf-8"?>
+   <?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -461,66 +458,42 @@
 	</g>
 </g>
 <g id="cercle_cliquable">
-	<path id="Rond_1_EQUI" fill="#473AA5" d="M194,164c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002c-4.973,0-9,4.03-9,9.002
-		C185.001,159.972,189.03,164,194,164 M194,166c-6.076,0-11-4.923-11-10.998S187.923,144,194,144c6.073,0,11,4.927,11,11.002
-		S200.073,166,194,166"/>
-	<path id="Rond_2_EQUI" fill="#473AA5" d="M194,138c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002c-4.973,0-9,4.03-9,9.002
-		C185.001,133.972,189.03,138,194,138 M194,140c-6.076,0-11-4.923-11-10.998S187.923,118,194,118c6.073,0,11,4.927,11,11.002
-		S200.073,140,194,140"/>
-	<path id="Rond_3_EQUI" fill="#473AA5" d="M194,111c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002c-4.973,0-9,4.03-9,9.002
-		C185.001,106.972,189.03,111,194,111 M194,113c-6.076,0-11-4.923-11-10.998S187.923,91,194,91c6.073,0,11,4.927,11,11.002
-		S200.073,113,194,113"/>
-	<path id="Rond_4_EQUI" fill="#473AA5" d="M193.999,84c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002
-		c-4.973,0-9,4.03-9,9.002C185,79.972,189.029,84,193.999,84 M193.999,86c-6.076,0-11-4.923-11-10.998S187.922,64,193.999,64
-		c6.073,0,11,4.927,11,11.002S200.072,86,193.999,86"/>
-	<path id="Rond_5_EQUI" fill="#473AA5" d="M194,57c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002c-4.973,0-9,4.03-9,9.002
-		C185.001,52.972,189.03,57,194,57 M194,59c-6.076,0-11-4.923-11-10.998S187.923,37,194,37c6.073,0,11,4.927,11,11.002
-		S200.073,59,194,59"/>
-	<path id="Rond_1_CARDIO" fill="#473AA5" d="M157,164c4.903,0,9-4.094,9-8.998S161.905,146,157,146c-4.906,0-9,4.096-9,9.002
-		C148.001,159.906,152.096,164,157,164 M157,166c-5.995,0-11-5.003-11-10.998S151.004,144,157,144c5.995,0,11,5.008,11,11.002
-		C168,160.996,162.994,166,157,166"/>
-	<path id="Rond_2_CARDIO" fill="#473AA5" d="M157,138c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002c-4.973,0-9,4.03-9,9.002
-		C148.001,133.972,152.03,138,157,138 M157,140c-6.076,0-11-4.923-11-10.998S150.923,118,157,118c6.073,0,11,4.927,11,11.002
-		S163.073,140,157,140"/>
-	<path id="Rond_3_CARDIO" fill="#473AA5" d="M157,111c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002c-4.973,0-9,4.03-9,9.002
-		C148.001,106.972,152.03,111,157,111 M157,113c-6.076,0-11-4.923-11-10.998S150.923,91,157,91c6.073,0,11,4.927,11,11.002
-		S163.073,113,157,113"/>
-	<path id="Rond_4_CARDIO" fill="#473AA5" d="M156.999,84c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002
-		c-4.973,0-9,4.03-9,9.002C148,79.972,152.029,84,156.999,84 M156.999,86c-6.076,0-11-4.923-11-10.998S150.922,64,156.999,64
-		c6.073,0,11,4.927,11,11.002S163.072,86,156.999,86"/>
-	<path id="Rond_5_CARDIO" fill="#473AA5" d="M157,57c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002c-4.973,0-9,4.03-9,9.002
-		C148.001,52.972,152.03,57,157,57 M157,59c-6.076,0-11-4.923-11-10.998S150.923,37,157,37c6.073,0,11,4.927,11,11.002
-		S163.073,59,157,59"/>
-	<path id="Rond_1_SOUP" fill="#473AA5" d="M157,310c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002c-4.973,0-9,4.03-9,9.002
-		C148.001,305.972,152.03,310,157,310 M157,312c-6.076,0-11-4.923-11-10.998S150.923,290,157,290c6.073,0,11,4.927,11,11.002
-		S163.073,312,157,312"/>
-	<path id="Rond_2_SOUP" fill="#473AA5" d="M157,284c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002c-4.973,0-9,4.03-9,9.002
-		C148.001,279.972,152.03,284,157,284 M157,286c-6.076,0-11-4.923-11-10.998S150.923,264,157,264c6.073,0,11,4.927,11,11.002
-		S163.073,286,157,286"/>
-	<path id="Rond_3_SOUP" fill="#473AA5" d="M157,257c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002c-4.973,0-9,4.03-9,9.002
-		C148.001,252.972,152.03,257,157,257 M157,259c-6.076,0-11-4.923-11-10.998S150.923,237,157,237c6.073,0,11,4.927,11,11.002
-		S163.073,259,157,259"/>
-	<path id="Rond_4_SOUP" fill="#473AA5" d="M156.999,230c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002
-		c-4.973,0-9,4.03-9,9.002C148,225.972,152.029,230,156.999,230 M156.999,232c-6.076,0-11-4.923-11-10.998s4.923-11.002,11-11.002
-		c6.073,0,11,4.927,11,11.002S163.072,232,156.999,232"/>
-	<path id="Rond_5_SOUP" fill="#473AA5" d="M157,203c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002c-4.973,0-9,4.03-9,9.002
-		C148.001,198.972,152.03,203,157,203 M157,205c-6.076,0-11-4.923-11-10.998S150.923,183,157,183c6.073,0,11,4.927,11,11.002
-		S163.073,205,157,205"/>
-	<path id="Rond_1_RENFO" fill="#473AA5" d="M194,310c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002c-4.973,0-9,4.03-9,9.002
-		C185.001,305.972,189.03,310,194,310 M194,312c-6.076,0-11-4.923-11-10.998S187.923,290,194,290c6.073,0,11,4.927,11,11.002
-		S200.073,312,194,312"/>
-	<path id="Rond_2_RENFO" fill="#473AA5" d="M194,284c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002c-4.973,0-9,4.03-9,9.002
-		C185.001,279.972,189.03,284,194,284 M194,286c-6.076,0-11-4.923-11-10.998S187.923,264,194,264c6.073,0,11,4.927,11,11.002
-		S200.073,286,194,286"/>
-	<path id="Rond_3_RENFO" fill="#473AA5" d="M194,257c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002c-4.973,0-9,4.03-9,9.002
-		C185.001,252.972,189.03,257,194,257 M194,259c-6.076,0-11-4.923-11-10.998S187.923,237,194,237c6.073,0,11,4.927,11,11.002
-		S200.073,259,194,259"/>
-	<path id="Rond_4_RENFO" fill="#473AA5" d="M193.999,230c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002
-		c-4.973,0-9,4.03-9,9.002C185,225.972,189.029,230,193.999,230 M193.999,232c-6.076,0-11-4.923-11-10.998s4.923-11.002,11-11.002
-		c6.073,0,11,4.927,11,11.002S200.072,232,193.999,232"/>
-	<path id="Rond_5_RENFO" fill="#473AA5" d="M194,203c4.969,0,9-4.028,9-8.998c0-4.971-4.031-9.002-9-9.002c-4.973,0-9,4.03-9,9.002
-		C185.001,198.972,189.03,203,194,203 M194,205c-6.076,0-11-4.923-11-10.998S187.923,183,194,183c6.073,0,11,4.927,11,11.002
-		S200.073,205,194,205"/>
+	<circle id="Rond_1_CARDIO" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="154" cy="155" r="11.338"/>
+	
+		<circle id="Rond_2_CARDIO" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="154" cy="128.587" r="11.338"/>
+	
+		<circle id="Rond_3_CARDIO" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="153.999" cy="102" r="11.338"/>
+	
+		<circle id="Rond_4_CARDIO" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="153.999" cy="75" r="11.338"/>
+	
+		<circle id="Rond_5_CARDIO" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="154" cy="49.08" r="11.338"/>
+	<circle id="Rond_1_EQUI" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="194" cy="154.96" r="11.338"/>
+	
+		<circle id="Rond_2_EQUI" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="194" cy="128.547" r="11.338"/>
+	
+		<circle id="Rond_3_EQUI" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="193.999" cy="101.96" r="11.339"/>
+	
+		<circle id="Rond_4_EQUI" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="193.999" cy="74.96" r="11.339"/>
+	<circle id="Rond_5_EQUI" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="194" cy="49.04" r="11.338"/>
+	
+		<circle id="Rond_1_RENFO" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="194.001" cy="300.96" r="11.338"/>
+	
+		<circle id="Rond_2_RENFO" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="194.001" cy="274.547" r="11.338"/>
+	
+		<circle id="Rond_3_RENFO" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="194" cy="247.96" r="11.339"/>
+	
+		<circle id="Rond_4_RENFO" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="194" cy="220.96" r="11.339"/>
+	
+		<circle id="Rond_5_RENFO" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="194.001" cy="195.039" r="11.338"/>
+	<circle id="Rond_1_SOUP" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="154" cy="300.92" r="11.338"/>
+	
+		<circle id="Rond_2_SOUP" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="154" cy="274.507" r="11.338"/>
+	
+		<circle id="Rond_3_SOUP" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="153.999" cy="247.92" r="11.339"/>
+	
+		<circle id="Rond_4_SOUP" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="153.999" cy="220.92" r="11.339"/>
+	
+		<ellipse id="Rond_5_SOUP" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="153.965" cy="195" rx="11.373" ry="11.336"/>
 </g>
 </svg>
 
@@ -532,15 +505,19 @@
     const downloadJPG = document.getElementById('downloadJPG');
     const svg = document.querySelector('svg');
 
-    /* CHANGEMENT COULEUR GLOBALE */
+    /* ===============================
+       CHANGEMENT DE COULEUR
+       =============================== */
     colorSelect.addEventListener('change', () => {
       document.documentElement
         .style
         .setProperty('--logo-color', colorSelect.value);
     });
 
-    /* CERCLES CLIQUABLES */
-    const cercles = document.querySelectorAll('[id^="Rond_"]');
+    /* ===============================
+       CERCLES CLIQUABLES
+       =============================== */
+    const cercles = document.querySelectorAll('circle[id^="Rond_"]');
 
     cercles.forEach(cercle => {
       cercle.addEventListener('click', () => {
@@ -548,7 +525,9 @@
       });
     });
 
-    /* EXPORT PNG / JPEG */
+    /* ===============================
+       EXPORT PNG / JPEG
+       =============================== */
     function exportImage(type) {
       const serializer = new XMLSerializer();
       const svgBlob = new Blob(
@@ -563,21 +542,27 @@
         const canvas = document.createElement('canvas');
         canvas.width = svg.viewBox.baseVal.width;
         canvas.height = svg.viewBox.baseVal.height;
+
         const ctx = canvas.getContext('2d');
 
         if (type === 'jpg') {
-          ctx.fillStyle = '#fff';
+          ctx.fillStyle = '#ffffff';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         ctx.drawImage(img, 0, 0);
+
+        const colorName =
+          colorSelect.options[colorSelect.selectedIndex].text
+            .toLowerCase()
+            .replace(/\s+/g, '-');
 
         const link = document.createElement('a');
         link.href = canvas.toDataURL(
           type === 'png' ? 'image/png' : 'image/jpeg',
           0.95
         );
-        link.download = `logo.${type}`;
+        link.download = `logo-${colorName}.${type}`;
         link.click();
 
         URL.revokeObjectURL(url);
@@ -592,3 +577,4 @@
 
 </body>
 </html>
+``

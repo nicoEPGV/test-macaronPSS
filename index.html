@@ -7,7 +7,7 @@
 
   <style>
     :root {
-      --logo-color: #473AA5; /* Violet intense par défaut */
+      --logo-color: #473AA5;
     }
 
     body {
@@ -64,26 +64,31 @@
 
     /* ===============================
        COULEUR GLOBALE DU LOGO
+       (EXCLUT LES CERCLES)
        =============================== */
-    svg path {
+    svg path:not([id^="Rond_"]) {
       fill: var(--logo-color);
       transition: fill 0.2s ease;
     }
 
     /* ===============================
-       CERCLES CLIQUABLES – VERSION CORRECTE
-       (fonctionne avec TON SVG actuel)
+       CERCLES CLIQUABLES (UX CORRECTE)
        =============================== */
     [id^="Rond_"] {
       cursor: pointer;
+
+      /* visuel */
       stroke: var(--logo-color);
       stroke-width: 2;
-      fill: transparent; /* cercle vide par défaut */
+      fill: rgba(0, 0, 0, 0.001); /* invisible mais cliquable */
+
+      /* interaction */
+      pointer-events: all;
       transition: fill 0.2s ease;
     }
 
     [id^="Rond_"].active {
-      fill: var(--logo-color); /* cercle rempli */
+      fill: var(--logo-color); /* REMPLI AU CLIC */
     }
   </style>
 </head>
@@ -92,7 +97,6 @@
 
   <h1>Personnalisation du logo</h1>
 
-  <!-- CONTROLES -->
   <div class="controls">
     <label for="colorSelect">
       Couleur du logo :
@@ -109,9 +113,8 @@
     <button id="downloadJPG">Télécharger en JPEG</button>
   </div>
 
-  <!-- LOGO -->
   <div class="logo-wrapper">
-<?xml version="1.0" encoding="utf-8"?>
+  <?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -520,6 +523,7 @@
 		S200.073,205,194,205"/>
 </g>
 </svg>
+
   </div>
 
   <script>
@@ -528,18 +532,14 @@
     const downloadJPG = document.getElementById('downloadJPG');
     const svg = document.querySelector('svg');
 
-    /* ===============================
-       CHANGEMENT DE COULEUR GLOBALE
-       =============================== */
+    /* CHANGEMENT COULEUR GLOBALE */
     colorSelect.addEventListener('change', () => {
       document.documentElement
         .style
         .setProperty('--logo-color', colorSelect.value);
     });
 
-    /* ===============================
-       CERCLES CLIQUABLES
-       =============================== */
+    /* CERCLES CLIQUABLES */
     const cercles = document.querySelectorAll('[id^="Rond_"]');
 
     cercles.forEach(cercle => {
@@ -548,16 +548,13 @@
       });
     });
 
-    /* ===============================
-       EXPORT PNG / JPEG
-       =============================== */
+    /* EXPORT PNG / JPEG */
     function exportImage(type) {
       const serializer = new XMLSerializer();
-      const svgString = serializer.serializeToString(svg);
-
-      const svgBlob = new Blob([svgString], {
-        type: 'image/svg+xml;charset=utf-8'
-      });
+      const svgBlob = new Blob(
+        [serializer.serializeToString(svg)],
+        { type: 'image/svg+xml;charset=utf-8' }
+      );
 
       const url = URL.createObjectURL(svgBlob);
       const img = new Image();
@@ -566,30 +563,21 @@
         const canvas = document.createElement('canvas');
         canvas.width = svg.viewBox.baseVal.width;
         canvas.height = svg.viewBox.baseVal.height;
-
         const ctx = canvas.getContext('2d');
 
-        // Fond blanc pour JPEG
         if (type === 'jpg') {
-          ctx.fillStyle = '#ffffff';
+          ctx.fillStyle = '#fff';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         ctx.drawImage(img, 0, 0);
 
-        const dataURL =
-          type === 'png'
-            ? canvas.toDataURL('image/png')
-            : canvas.toDataURL('image/jpeg', 0.95);
-
-        const colorName =
-          colorSelect.options[colorSelect.selectedIndex].text
-            .toLowerCase()
-            .replace(/\s+/g, '-');
-
         const link = document.createElement('a');
-        link.href = dataURL;
-        link.download = `logo-${colorName}.${type}`;
+        link.href = canvas.toDataURL(
+          type === 'png' ? 'image/png' : 'image/jpeg',
+          0.95
+        );
+        link.download = `logo.${type}`;
         link.click();
 
         URL.revokeObjectURL(url);
@@ -604,4 +592,3 @@
 
 </body>
 </html>
-``

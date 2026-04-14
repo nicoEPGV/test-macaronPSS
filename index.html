@@ -31,34 +31,54 @@
 
     .logo-wrapper {
       max-width: 360px;
+      margin: auto;
       background: white;
       padding: 1rem;
       border-radius: 12px;
-      margin: auto;
     }
 
-    /* LOGO */
+    /* ---------- LOGO ---------- */
     svg path {
       fill: var(--logo-color);
     }
 
-    /* CERCLES */
+    /* ---------- CERCLES ---------- */
     circle[id^="Rond_"] {
       cursor: pointer;
-      fill: transparent;          /* surface cliquable */
-      stroke: var(--logo-color);  /* contour */
+      fill: transparent;
+      stroke: var(--logo-color);
       stroke-width: 2;
+      transition: opacity 0.2s ease, fill 0.2s ease;
     }
 
     circle[id^="Rond_"].active {
       fill: var(--logo-color);
+    }
+
+    /* Cercle désactivé */
+    .circle-disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+      pointer-events: none;
     }
   </style>
 </head>
 
 <body>
 
+<!-- CONTROLES -->
 <div class="controls">
+
+  <label>
+    Activité :
+    <select id="activitySelect">
+      <option value="yoga">Yoga (non modifiable)</option>
+      <option value="cardio">Cardio</option>
+      <option value="cross">Cross training</option>
+      <option value="prevention">Prévention</option>
+    </select>
+  </label>
+
   <label>
     Couleur :
     <select id="colorSelect">
@@ -74,6 +94,7 @@
   <button id="downloadJPG">Télécharger JPEG</button>
 </div>
 
+<!-- LOGO -->
 <div class="logo-wrapper">
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
@@ -468,89 +489,152 @@
 </div>
 
 <script>
-  const colorSelect = document.getElementById('colorSelect');
-  const svg = document.querySelector('svg');
-
-  // Couleur dynamique à l’écran
-  colorSelect.addEventListener('change', () => {
-    document.documentElement.style
-      .setProperty('--logo-color', colorSelect.value);
-  });
-
-  // Cercles cliquables
-  document.querySelectorAll('circle[id^="Rond_"]').forEach(cercle => {
-    cercle.addEventListener('click', () => {
-      cercle.classList.toggle('active');
-    });
-  });
-
-  /* ===============================
-     EXPORT FIDÈLE
-     =============================== */
-  function exportImage(type) {
-    const clone = svg.cloneNode(true);
-    const couleur = getComputedStyle(document.documentElement)
-      .getPropertyValue('--logo-color')
-      .trim();
-
-    // 🔒 Figer les paths du logo
-    clone.querySelectorAll('path').forEach(path => {
-      path.setAttribute('fill', couleur);
-    });
-
-    // 🔒 Figer les cercles
-    clone.querySelectorAll('circle[id^="Rond_"]').forEach(circle => {
-      circle.setAttribute('stroke', couleur);
-
-      if (circle.classList.contains('active')) {
-        circle.setAttribute('fill', couleur);
-      } else {
-        circle.setAttribute('fill', 'none');
-      }
-    });
-
-    const serializer = new XMLSerializer();
-    const blob = new Blob(
-      [serializer.serializeToString(clone)],
-      { type: 'image/svg+xml;charset=utf-8' }
-    );
-
-    const img = new Image();
-    const url = URL.createObjectURL(blob);
-
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = svg.viewBox.baseVal.width;
-      canvas.height = svg.viewBox.baseVal.height;
-      const ctx = canvas.getContext('2d');
-
-      if (type === 'jpg') {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-
-      ctx.drawImage(img, 0, 0);
-
-      const a = document.createElement('a');
-      a.href = canvas.toDataURL(
-        type === 'png' ? 'image/png' : 'image/jpeg',
-        0.95
-      );
-      a.download = `logo-${couleur.replace('#','')}.${type}`;
-      a.click();
-
-      URL.revokeObjectURL(url);
-    };
-
-    img.src = url;
+/* ==================================================
+   CONFIGURATION DES ACTIVITÉS (RÈGLES MÉTIER)
+   ================================================== */
+const ACTIVITIES = {
+  yoga: {
+    label: "Yoga",
+    editable: false
+  },
+  cardio: {
+    label: "Cardio",
+    editable: true,
+    zones: ["CARDIO"]
+  },
+  cross: {
+    label: "Cross training",
+    editable: true,
+    zones: ["CARDIO", "RENFO"]
+  },
+  prevention: {
+    label: "Prévention",
+    editable: true,
+    zones: ["EQUI"]
   }
+};
 
-  document.getElementById('downloadPNG')
-    .addEventListener('click', () => exportImage('png'));
+const colorSelect   = document.getElementById('colorSelect');
+const activitySelect = document.getElementById('activitySelect');
+const svg = document.querySelector('svg');
 
-  document.getElementById('downloadJPG')
-    .addEventListener('click', () => exportImage('jpg'));
+/* ==================================================
+   COULEUR DYNAMIQUE
+   ================================================== */
+colorSelect.addEventListener('change', () => {
+  document.documentElement
+    .style
+    .setProperty('--logo-color', colorSelect.value);
+});
+
+/* ==================================================
+   CERCLES CLIQUABLES
+   ================================================== */
+const cercles = document.querySelectorAll('circle[id^="Rond_"]');
+
+cercles.forEach(cercle => {
+  cercle.addEventListener('click', () => {
+    if (!cercle.classList.contains('circle-disabled')) {
+      cercle.classList.toggle('active');
+    }
+  });
+});
+
+/* ==================================================
+   APPLICATION DES RÈGLES PAR ACTIVITÉ
+   ================================================== */
+function resetCercles() {
+  cercles.forEach(c => c.classList.remove('active'));
+}
+
+function applyActivity(activityKey) {
+  const config = ACTIVITIES[activityKey];
+
+  cercles.forEach(cercle => {
+    const zone = cercle.id.split('_').pop(); // CARDIO / RENFO / EQUI / SOUP
+
+    if (!config.editable) {
+      cercle.classList.add('circle-disabled');
+      return;
+    }
+
+    if (config.zones.includes(zone)) {
+      cercle.classList.remove('circle-disabled');
+    } else {
+      cercle.classList.add('circle-disabled');
+    }
+  });
+}
+
+activitySelect.addEventListener('change', e => {
+  resetCercles();
+  applyActivity(e.target.value);
+});
+
+// Initialisation
+applyActivity(activitySelect.value);
+
+/* ==================================================
+   EXPORT PNG / JPEG (FIDÈLE À L'ÉCRAN)
+   ================================================== */
+function exportImage(type) {
+  const clone = svg.cloneNode(true);
+  const couleur = getComputedStyle(document.documentElement)
+    .getPropertyValue('--logo-color')
+    .trim();
+
+  clone.querySelectorAll('path').forEach(path => {
+    path.setAttribute('fill', couleur);
+  });
+
+  clone.querySelectorAll('circle[id^="Rond_"]').forEach(circle => {
+    circle.setAttribute('stroke', couleur);
+    circle.setAttribute(
+      'fill',
+      circle.classList.contains('active') ? couleur : 'none'
+    );
+  });
+
+  const serializer = new XMLSerializer();
+  const blob = new Blob(
+    [serializer.serializeToString(clone)],
+    { type: 'image/svg+xml;charset=utf-8' }
+  );
+
+  const img = new Image();
+  const url = URL.createObjectURL(blob);
+
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = svg.viewBox.baseVal.width;
+    canvas.height = svg.viewBox.baseVal.height;
+    const ctx = canvas.getContext('2d');
+
+    if (type === 'jpg') {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    ctx.drawImage(img, 0, 0);
+
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL(
+      type === 'png' ? 'image/png' : 'image/jpeg',
+      0.95
+    );
+    a.download = `logo-${activitySelect.value}.${type}`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+  };
+
+  img.src = url;
+}
+
+document.getElementById('downloadPNG').onclick = () => exportImage('png');
+document.getElementById('downloadJPG').onclick = () => exportImage('jpg');
 </script>
 
 </body>
 </html>
+

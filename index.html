@@ -141,6 +141,7 @@
       margin-top:.75rem;
       padding-top:.75rem;
       border-top:1px solid var(--ui-gray);
+      justify-content:flex-start;
     }
 
     .btn-primary{
@@ -163,7 +164,15 @@
       font-size:.9rem;
     }
 
-    button:hover{opacity:.9}
+    button:hover{opacity:.92}
+    button:disabled{opacity:.55; cursor:not-allowed}
+
+    .status{
+      width:100%;
+      font-size:.9rem;
+      color:#444;
+      margin-top:.25rem;
+    }
 
     /* ===== LOGO ===== */
     .logo-wrapper{
@@ -192,6 +201,7 @@
       .controls{flex-direction:column;align-items:stretch}
       select,button{width:100%}
       .logo-wrapper{max-width:100%}
+      .actions{justify-content:stretch}
     }
   </style>
 </head>
@@ -224,9 +234,9 @@
       PNG : fond transparent<br>
       JPEG : fond blanc<br>
       ZIP activité : pack complet de ton logo créé<br>
-		<em>(PNG et JPEG avec la couleur choisie)<em><br>
+      <em>(PNG et JPEG avec la couleur choisie)</em><br>
       ZIP macarons figés : Tous les macarons figés 🔒<br>
-		<em>(PNG et JPEG de toutes les couleurs)<em>
+      <em>(PNG et JPEG de toutes les couleurs)</em>
     </p>
   </aside>
 
@@ -238,7 +248,7 @@
       <summary>📘 Aide / Mode d’emploi</summary>
       <div class="aide-content">
         <p><strong>1)</strong> Choisir l’activité</p>
-        <p><strong>2)</strong> Ajuster si autorisé</p>
+        <p><strong>2)</strong> Ajuster si autorisé (gris = verrouillé)</p>
         <p><strong>3)</strong> Couleur & résolution</p>
         <p><strong>4)</strong> Exporter</p>
       </div>
@@ -272,15 +282,19 @@
         <button class="btn-secondary" id="downloadPNG">PNG</button>
         <button class="btn-secondary" id="downloadJPG">JPEG</button>
         <button class="btn-primary" id="downloadZIP">ZIP activité</button>
-        <button class="btn-institutional" id="downloadZIPLocked">
-          🔒 ZIP macarons figés
-        </button>
+        <button class="btn-institutional" id="downloadZIPLocked">🔒 ZIP macarons figés</button>
+        <div class="status" id="status"></div>
       </div>
     </div>
 
     <!-- LOGO -->
     <div class="logo-wrapper">
-    <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    
+    </div>
+
+  </main>
+</div>
+<svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="356px" height="356px" viewBox="0 0 356 356" enable-background="new 0 0 356 356" xml:space="preserve">
 <g id="PAS_CLIQUABLE">
 	<path id="logo_cardio" fill="#473AA5" d="M76.365,81.347c4.663-5.146,12.374-6.86,18.642-3.64c0.806,0.414,1.575,0.897,2.298,1.44
@@ -666,77 +680,146 @@
 		<circle id="Rond_5_SOUP" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="153.609" cy="193" r="11.338"/>
 </g>
 </svg>
-    </div>
-
-  </main>
-</div>
-
 <script type="module">
   import { ACTIVITIES } from "./activities.js";
 
+  // ====== Sélecteurs UI ======
   const activitySelect = document.getElementById("activitySelect");
-  const colorSelect = document.getElementById("colorSelect");
+  const colorSelect    = document.getElementById("colorSelect");
+  const sizeSelect     = document.getElementById("sizeSelect");
+  const statusEl       = document.getElementById("status");
 
-  const cercles = document.querySelectorAll('circle[id^="Rond_"]');
+  const btnPNG   = document.getElementById("downloadPNG");
+  const btnJPG   = document.getElementById("downloadJPG");
+  const btnZIP   = document.getElementById("downloadZIP");
+  const btnLOCK  = document.getElementById("downloadZIPLocked");
 
+  // Couleurs fédérales (utilisées pour les ZIP)
+  const EXPORT_COLORS = {
+    "jaune-energie": "#FF9400",
+    "pourpre-agile": "#B9009D",
+    "rose-tonus": "#FF0C6A",
+    "violet-intense": "#473AA5",
+    "bleu-flex": "#919CFF"
+  };
+
+  const JPG_QUALITY = 0.95;
+
+  // ====== Utils UI ======
+  function setStatus(msg=""){ statusEl.textContent = msg; }
+  function setBusy(isBusy, msg=""){
+    btnPNG.disabled = isBusy;
+    btnJPG.disabled = isBusy;
+    btnZIP.disabled = isBusy;
+    btnLOCK.disabled = isBusy;
+    setStatus(msg);
+  }
+
+  function getExportSize(){
+    const v = parseInt(sizeSelect.value, 10);
+    return Number.isFinite(v) ? v : 2048;
+  }
+
+  function setUIColor(hex){
+    document.documentElement.style.setProperty("--logo-color", hex);
+  }
+
+  // ====== SVG helpers ======
+  function getSVG(){
+    return document.querySelector(".logo-wrapper svg");
+  }
+
+  function getCircles(){
+    return document.querySelectorAll('circle[id^="Rond_"]');
+  }
+
+  function ensureSVG(){
+    const svg = getSVG();
+    if(!svg){
+      alert("⚠️ SVG manquant : colle ton <svg>…</svg> dans la zone logo-wrapper.");
+      throw new Error("SVG manquant");
+    }
+    const circles = getCircles();
+    if(!circles.length){
+      alert("⚠️ Aucun cercle cliquable trouvé (id^='Rond_'). Vérifie les IDs dans ton SVG.");
+      throw new Error("Cercles manquants");
+    }
+    return svg;
+  }
+
+  // ====== Menu activités ======
   function generateActivityMenu(){
-    activitySelect.innerHTML="";
+    activitySelect.innerHTML = "";
     Object.entries(ACTIVITIES)
       .sort((a,b)=>a[1].label.localeCompare(b[1].label,"fr"))
       .forEach(([key,a])=>{
-        const opt=document.createElement("option");
-        opt.value=key;
-        opt.textContent=a.label;
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = a.label;
         activitySelect.appendChild(opt);
       });
   }
 
+  // ====== Logique activité / restrictions ======
   function resetCercles(){
-    cercles.forEach(c=>c.classList.remove("active","circle-disabled"));
+    getCircles().forEach(c=>c.classList.remove("active","circle-disabled"));
   }
 
   function applyPresets(presets){
-    Object.entries(presets).forEach(([zone,count])=>{
-      document
-        .querySelectorAll(`circle[id$="_${zone}"]`)
-        .forEach((c,i)=>{
-          c.classList.add("circle-disabled");
-          if(i<count) c.classList.add("active");
-        });
+    Object.entries(presets || {}).forEach(([zone,count])=>{
+      document.querySelectorAll(`circle[id$="_${zone}"]`).forEach((c,i)=>{
+        c.classList.add("circle-disabled");
+        if(i < count) c.classList.add("active");
+      });
     });
   }
 
   function applyActivity(key){
-    const a=ACTIVITIES[key];
+    const a = ACTIVITIES[key];
     if(!a) return;
 
     resetCercles();
     applyPresets(a.presets);
 
-    cercles.forEach(c=>{
-      const z=c.id.split("_").pop();
-      a.editableZones.includes(z)
-        ? c.classList.remove("circle-disabled")
-        : c.classList.add("circle-disabled");
+    // Zones éditables / verrouillées
+    getCircles().forEach(c=>{
+      const z = c.id.split("_").pop();
+      if(Array.isArray(a.editableZones) && a.editableZones.includes(z)){
+        c.classList.remove("circle-disabled");
+      }else{
+        c.classList.add("circle-disabled");
+      }
     });
   }
 
-  cercles.forEach(c=>{
-    c.addEventListener("click",()=>{
-      if(!c.classList.contains("circle-disabled")){
-        c.classList.toggle("active");
-      }
+  function bindCircleClicks(){
+    // Bind une seule fois : on délègue au document (robuste même si SVG est recollé)
+    document.addEventListener("click", (e)=>{
+      const target = e.target;
+      if(!(target instanceof SVGCircleElement)) return;
+      if(!target.id || !target.id.startsWith("Rond_")) return;
+      if(target.classList.contains("circle-disabled")) return;
+      target.classList.toggle("active");
     });
-  });
+  }
 
-  colorSelect.addEventListener("change",()=>{
-    document.documentElement.style.setProperty("--logo-color",colorSelect.value);
-  });
+  // ====== Export : génération SVG string depuis l'état UI ======
+  function generateColoredSVGStringFromUI(color){
+    const svg = ensureSVG();
+    const clone = svg.cloneNode(true);
 
-  generateActivityMenu();
-  applyActivity(activitySelect.value);
-  activitySelect.addEventListener("change",e=>applyActivity(e.target.value));
-</script>
+    clone.querySelectorAll("path").forEach(p => p.setAttribute("fill", color));
+    clone.querySelectorAll('circle[id^="Rond_"]').forEach(c => {
+      c.setAttribute("stroke", color);
+      c.setAttribute("fill", c.classList.contains("active") ? color : "none");
+    });
 
-</body>
-</html>
+    if(!clone.getAttribute("xmlns")){
+      clone.setAttribute("xmlns","http://www.w3.org/2000/svg");
+    }
+
+    return new XMLSerializer().serializeToString(clone);
+  }
+
+  // ====== Export : presets “figés” (sans dépendre des clics user) ======
+  function applyPresetsOnClone

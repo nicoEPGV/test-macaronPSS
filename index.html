@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -6,12 +6,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
   <style>
-    :root { --logo-color: #473AA5; }
+    :root {
+      --logo-color: #473AA5;
+    }
 
     body {
       font-family: system-ui, sans-serif;
-      background: #f6f6f7;
       padding: 2rem;
+      min-height: 100vh;
+
+      /* ✅ Fond discret : voile clair + image bg.png derrière */
+      background-image:
+        linear-gradient(rgba(246, 246, 247, 0.95), rgba(246, 246, 247, 0.95)),
+        url("./assets/bg.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+
+      /* fallback si l’image ne charge pas */
+      background-color: #f6f6f7;
     }
 
     .controls {
@@ -20,6 +33,12 @@
       margin-bottom: 2rem;
       flex-wrap: wrap;
       align-items: center;
+
+      /* ✅ neutralise visuellement l’influence du fond */
+      background: rgba(255, 255, 255, 0.92);
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
     }
 
     select, button {
@@ -30,13 +49,16 @@
     .logo-wrapper {
       max-width: 360px;
       margin: auto;
-      background: white;
+      background: rgba(255, 255, 255, 0.96);
       padding: 1rem;
       border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
     }
 
     /* Logo */
-    svg path { fill: var(--logo-color); }
+    svg path {
+      fill: var(--logo-color);
+    }
 
     /* Cercles */
     circle[id^="Rond_"] {
@@ -47,7 +69,9 @@
       transition: opacity 0.2s ease, fill 0.2s ease;
     }
 
-    circle[id^="Rond_"].active { fill: var(--logo-color); }
+    circle[id^="Rond_"].active {
+      fill: var(--logo-color);
+    }
 
     .circle-disabled {
       opacity: 0.25;
@@ -78,7 +102,7 @@
       </select>
     </label>
 
-    <!-- ✅ NOUVEAU : menu résolution placé après la couleur -->
+    <!-- ✅ Menu résolution après Couleur -->
     <label>
       Résolution export :
       <select id="sizeSelect">
@@ -90,14 +114,12 @@
 
     <button id="downloadPNG">Télécharger PNG</button>
     <button id="downloadJPG">Télécharger JPEG</button>
-
-    <!-- ✅ NOUVEAU : ZIP PNG + JPG toutes couleurs -->
     <button id="downloadZIP">Télécharger ZIP (PNG+JPG toutes couleurs)</button>
   </div>
 
   <!-- LOGO -->
   <div class="logo-wrapper">
- <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+  <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="356px" height="356px" viewBox="0 0 356 356" enable-background="new 0 0 356 356" xml:space="preserve">
 <g id="PAS_CLIQUABLE">
 	<path id="logo_cardio" fill="#473AA5" d="M76.365,81.347c4.663-5.146,12.374-6.86,18.642-3.64c0.806,0.414,1.575,0.897,2.298,1.44
@@ -495,7 +517,7 @@
     const sizeSelect = document.getElementById("sizeSelect");
     const svg = document.querySelector("svg");
 
-    // Couleurs exportées dans le ZIP (reprend tes options)
+    // Couleurs exportées dans le ZIP (les mêmes que ton select)
     const EXPORT_COLORS = {
       "jaune-energie": "#FF9400",
       "pourpre-agile": "#B9009D",
@@ -595,7 +617,6 @@
        - recolore pour export
        - rasterise à la résolution sélectionnée
        ====================================================== */
-
     function generateColoredSVGString(color) {
       const clone = svg.cloneNode(true);
 
@@ -659,7 +680,7 @@
 
       const size = getExportSize();
       const targetW = size;
-      const targetH = Math.round(size * (baseH / baseW)); // ici carré -> size
+      const targetH = Math.round(size * (baseH / baseW));
 
       const canvas = document.createElement("canvas");
       canvas.width = targetW;
@@ -711,9 +732,6 @@
 
     /* ======================================================
        EXPORT ZIP (PNG + JPG toutes couleurs, sous-dossiers)
-       - respecte modifs utilisateur (cercles actifs)
-       - respecte activité (presets + zones)
-       - respecte résolution choisie
        ====================================================== */
     const yieldToUI = () => new Promise(r => setTimeout(r, 0));
 
@@ -732,12 +750,10 @@
         const folderJPG = zip.folder("JPG");
 
         for (const [slug, hex] of Object.entries(EXPORT_COLORS)) {
-          // PNG
           const pngBlob = await renderRaster({ color: hex, type: "png" });
           folderPNG.file(`logo-${activity}-${slug}-${size}px.png`, pngBlob);
           await yieldToUI();
 
-          // JPG
           const jpgBlob = await renderRaster({ color: hex, type: "jpg" });
           folderJPG.file(`logo-${activity}-${slug}-${size}px.jpg`, jpgBlob);
           await yieldToUI();
@@ -758,17 +774,12 @@
        INITIALISATION
        ====================================================== */
     generateActivityMenu();
-
-    // Applique la couleur initiale du select
     setUIColor(colorSelect.value);
-
-    // Applique l'activité initiale (presets + restrictions)
     applyActivity(activitySelect.value);
 
     activitySelect.addEventListener("change", e => {
       applyActivity(e.target.value);
     });
-
   </script>
 
 </body>

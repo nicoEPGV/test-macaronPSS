@@ -22,9 +22,11 @@
       background-color:var(--ui-bg);
     }
 
+    /* ===== LAYOUT ===== */
     .page{
       max-width:1200px;
       margin:auto;
+      display:block;
     }
 
     @media(min-width:1024px){
@@ -56,6 +58,48 @@
       }
     }
 
+    .tutoriel-desktop h2{
+      margin:0 0 1rem;
+      font-size:1.15rem;
+    }
+
+    .tutoriel-desktop p{
+      margin:.55rem 0;
+      font-size:1rem;
+      line-height:1.45;
+    }
+
+    .tutoriel-desktop strong{
+      color:var(--logo-color);
+    }
+
+    /* ===== AIDE MOBILE ===== */
+    .aide-mobile{
+      background:#fff;
+      border-radius:12px;
+      padding:.75rem 1rem;
+      margin-bottom:1rem;
+      border-left:6px solid var(--logo-color);
+      box-shadow:0 10px 30px rgba(0,0,0,.06);
+    }
+
+    .aide-mobile summary{
+      cursor:pointer;
+      font-weight:700;
+    }
+
+    .aide-mobile summary::-webkit-details-marker{display:none}
+
+    .aide-content p{
+      margin:.4rem 0;
+      font-size:.95rem;
+      line-height:1.35;
+    }
+
+    @media(min-width:1024px){
+      .aide-mobile{display:none}
+    }
+
     /* ===== CONTROLES ===== */
     .controls{
       background:#fff;
@@ -83,7 +127,12 @@
       transition:all .2s ease;
     }
 
-    /* ===== ACTIONS ===== */
+    select:focus{
+      outline:none;
+      border-color:var(--logo-color);
+    }
+
+    /* ===== ACTIONS (boutons) ===== */
     .actions{
       width:100%;
       display:flex;
@@ -92,6 +141,7 @@
       margin-top:.75rem;
       padding-top:.75rem;
       border-top:1px solid var(--ui-gray);
+      justify-content:flex-start;
     }
 
     .btn-primary{
@@ -115,7 +165,14 @@
     }
 
     button:hover{opacity:.92}
-    button:disabled{opacity:.55;cursor:not-allowed}
+    button:disabled{opacity:.55; cursor:not-allowed}
+
+    .status{
+      width:100%;
+      font-size:.9rem;
+      color:#444;
+      margin-top:.25rem;
+    }
 
     /* ===== LOGO ===== */
     .logo-wrapper{
@@ -134,47 +191,70 @@
     }
 
     svg path{fill:var(--logo-color)}
+    circle{stroke:var(--logo-color);stroke-width:2}
+    circle.active{fill:var(--logo-color)}
+    .circle-disabled{opacity:.25;pointer-events:none}
 
-    /* ✅ CERCLES — clic sur toute la surface */
-    circle{
-      stroke:var(--logo-color);
-      stroke-width:2;
-      fill:none;
-      pointer-events:all;
-      cursor:pointer;
-    }
-
-    circle.active{
-      fill:var(--logo-color);
-    }
-
-    .circle-disabled{
-      opacity:.25;
-      pointer-events:none;
-    }
-
+    /* ===== MOBILE ===== */
     @media(max-width:640px){
       body{padding:1rem}
-      .controls{flex-direction:column}
+      .controls{flex-direction:column;align-items:stretch}
       select,button{width:100%}
       .logo-wrapper{max-width:100%}
+      .actions{justify-content:stretch}
     }
   </style>
 </head>
 
 <body>
+
 <div class="page">
 
+  <!-- ===== TUTORIEL PC ===== -->
   <aside class="tutoriel-desktop">
     <h2>Mode d’emploi</h2>
-    <p><strong>1.</strong> Choisis une activité</p>
-    <p><strong>2.</strong> Clique les cercles pour remplir / vider</p>
-    <p><strong>3.</strong> Choisis la couleur et la résolution</p>
-    <p><strong>4.</strong> Télécharge</p>
+
+    <p><strong>🟦 1) Créer le macaron</strong><br>
+      Choix Activité / Programme : choisis dans la liste.<br>
+      A toi de jouer : clique sur les cercles des piliers.<br>
+      <em>(cercles grisés = verrouillés)</em>.
+    </p>
+
+    <p><strong>🎨 2) Choisir une couleur</strong><br>
+      Sélectionne une couleur fédérale.
+    </p>
+
+    <p><strong>📐 3) Choisir une résolution (HD)</strong><br>
+      1024 px : web léger<br>
+      2048 px (recommandé)<br>
+      4096 px : très HD (plus long)
+    </p>
+
+    <p><strong>⬇️ 4) Télécharger</strong><br>
+      PNG : fond transparent<br>
+      JPEG : fond blanc<br>
+      ZIP activité : pack complet de ton logo créé<br>
+      <em>(PNG et JPEG avec la couleur choisie)</em><br>
+      ZIP macarons figés : Tous les macarons figés 🔒<br>
+      <em>(PNG et JPEG de toutes les couleurs)</em>
+    </p>
   </aside>
 
+  <!-- ===== OUTIL ===== -->
   <main>
 
+    <!-- AIDE MOBILE -->
+    <details class="aide-mobile">
+      <summary>📘 Aide / Mode d’emploi</summary>
+      <div class="aide-content">
+        <p><strong>1)</strong> Choisir l’activité</p>
+        <p><strong>2)</strong> Ajuster si autorisé (gris = verrouillé)</p>
+        <p><strong>3)</strong> Couleur & résolution</p>
+        <p><strong>4)</strong> Exporter</p>
+      </div>
+    </details>
+
+    <!-- CONTROLES -->
     <div class="controls">
       <label>Activité
         <select id="activitySelect"></select>
@@ -203,11 +283,13 @@
         <button class="btn-secondary" id="downloadJPG">JPEG</button>
         <button class="btn-primary" id="downloadZIP">ZIP activité</button>
         <button class="btn-institutional" id="downloadZIPLocked">🔒 ZIP macarons figés</button>
+        <div class="status" id="status"></div>
       </div>
     </div>
 
+    <!-- LOGO -->
     <div class="logo-wrapper">
-     <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="356px" height="356px" viewBox="0 0 356 356" enable-background="new 0 0 356 356" xml:space="preserve">
 <g id="PAS_CLIQUABLE">
 	<path id="logo_cardio" fill="#473AA5" d="M76.365,81.347c4.663-5.146,12.374-6.86,18.642-3.64c0.806,0.414,1.575,0.897,2.298,1.44
@@ -598,44 +680,384 @@
   </main>
 </div>
 
-<script type="module">
-  import { ACTIVITIES } from "./activities.js";
-  import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
+ <!-- ✅ SCRIPT MODULE (OBLIGATOIREMENT ICI, EN FIN DE BODY) -->
+  <script type="module">
+    import { ACTIVITIES } from "./activities.js";
+    import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
 
-  const activitySelect = document.getElementById("activitySelect");
-  const colorSelect = document.getElementById("colorSelect");
-  const sizeSelect = document.getElementById("sizeSelect");
-  const svg = document.querySelector("svg");
+    const activitySelect = document.getElementById("activitySelect");
+    const colorSelect = document.getElementById("colorSelect");
+    const sizeSelect = document.getElementById("sizeSelect");
+    const svg = document.querySelector("svg");
 
-  function generateActivityMenu(){
-    activitySelect.innerHTML="";
-    Object.entries(ACTIVITIES).forEach(([key,activity])=>{
-      const opt=document.createElement("option");
-      opt.value=key;
-      opt.textContent=activity.label;
-      activitySelect.appendChild(opt);
+    if (!svg) {
+      console.error("⚠️ Aucun <svg> trouvé dans la page. Remets ton SVG complet dans .logo-wrapper.");
+    }
+
+    // Couleurs exportées dans le ZIP (les mêmes que ton select)
+    const EXPORT_COLORS = {
+      "jaune-energie": "#FF9400",
+      "pourpre-agile": "#B9009D",
+      "rose-tonus": "#FF0C6A",
+      "violet-intense": "#473AA5",
+      "bleu-flex": "#919CFF"
+    };
+
+    // Qualité JPEG (compression). La “HD” vient surtout de la résolution.
+    const JPG_QUALITY = 0.95;
+
+    function getExportSize() {
+      const v = parseInt(sizeSelect.value, 10);
+      return Number.isFinite(v) ? v : 2048;
+    }
+
+    /* ======================================================
+       GÉNÉRATION AUTOMATIQUE DU MENU ACTIVITÉ
+       ====================================================== */
+    function generateActivityMenu() {
+      activitySelect.innerHTML = "";
+
+      Object.entries(ACTIVITIES)
+        .sort((a, b) => a[1].label.localeCompare(b[1].label, "fr"))
+        .forEach(([key, activity]) => {
+          const option = document.createElement("option");
+          option.value = key;
+          option.textContent = activity.label;
+          activitySelect.appendChild(option);
+        });
+    }
+
+    /* ======================================================
+       CERCLES
+       ====================================================== */
+    const cercles = document.querySelectorAll('circle[id^="Rond_"]');
+
+    cercles.forEach(cercle => {
+      cercle.addEventListener("click", () => {
+        if (!cercle.classList.contains("circle-disabled")) {
+          cercle.classList.toggle("active");
+        }
+      });
     });
-  }
 
-  function setUIColor(hex){
-    document.documentElement.style.setProperty("--logo-color",hex);
-  }
+    /* ======================================================
+       LOGIQUE MÉTIER (respect activities.js)
+       ====================================================== */
+    function resetCercles() {
+      cercles.forEach(c => {
+        c.classList.remove("active", "circle-disabled");
+      });
+    }
 
-  colorSelect.addEventListener("change",()=>setUIColor(colorSelect.value));
+    function applyPresets(presets) {
+      Object.entries(presets).forEach(([zone, count]) => {
+        const zoneCircles = document.querySelectorAll(`circle[id$="_${zone}"]`);
 
-  const cercles = document.querySelectorAll('circle[id^="Rond_"]');
+        zoneCircles.forEach((cercle, index) => {
+          cercle.classList.add("circle-disabled");
+          if (index < count) {
+            cercle.classList.add("active");
+          }
+        });
+      });
+    }
 
-  cercles.forEach(cercle=>{
-    cercle.addEventListener("click",()=>{
-      if(!cercle.classList.contains("circle-disabled")){
-        cercle.classList.toggle("active");
+    function applyActivity(activityKey) {
+      const activity = ACTIVITIES[activityKey];
+      if (!activity) return;
+
+      resetCercles();
+      applyPresets(activity.presets);
+
+      cercles.forEach(cercle => {
+        const zone = cercle.id.split("_").pop();
+        if (activity.editableZones.includes(zone)) {
+          cercle.classList.remove("circle-disabled");
+        } else {
+          cercle.classList.add("circle-disabled");
+        }
+      });
+    }
+
+    /* ======================================================
+       COULEUR (UI)
+       ====================================================== */
+    function setUIColor(hex) {
+      document.documentElement.style.setProperty("--logo-color", hex);
+    }
+    colorSelect.addEventListener("change", () => setUIColor(colorSelect.value));
+
+    /* ======================================================
+       EXPORTS HD (activité courante)
+       - prend l'état ACTUEL du logo (modifs utilisateur)
+       ====================================================== */
+    function generateColoredSVGString(color) {
+      const clone = svg.cloneNode(true);
+
+      clone.querySelectorAll("path").forEach(p => {
+        p.setAttribute("fill", color);
+      });
+
+      clone.querySelectorAll('circle[id^="Rond_"]').forEach(c => {
+        c.setAttribute("stroke", color);
+        c.setAttribute("fill", c.classList.contains("active") ? color : "none");
+      });
+
+      if (!clone.getAttribute("xmlns")) {
+        clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
       }
-    });
-  });
 
-  generateActivityMenu();
-  setUIColor(colorSelect.value);
-</script>
+      return new XMLSerializer().serializeToString(clone);
+    }
+
+    function svgStringToImage(svgString) {
+      return new Promise((resolve, reject) => {
+        const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+
+        const img = new Image();
+        img.decoding = "async";
+
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          resolve(img);
+        };
+
+        img.onerror = (e) => {
+          URL.revokeObjectURL(url);
+          reject(e);
+        };
+
+        img.src = url;
+      });
+    }
+
+    function canvasToBlob(canvas, mime, quality) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(b => {
+          if (!b) reject(new Error("canvas.toBlob a retourné null (mémoire / canvas trop grand)."));
+          else resolve(b);
+        }, mime, quality);
+      });
+    }
+
+    // ✅ Rasterise à partir d’une SVG string (réutilisable pour “figé”)
+    async function renderRasterFromSVGString(svgString, type) {
+      const img = await svgStringToImage(svgString);
+
+      const vb = svg.viewBox?.baseVal;
+      const baseW = vb?.width || svg.width?.baseVal?.value || 356;
+      const baseH = vb?.height || svg.height?.baseVal?.value || 356;
+
+      const size = getExportSize();
+      const targetW = size;
+      const targetH = Math.round(size * (baseH / baseW));
+
+      const canvas = document.createElement("canvas");
+      canvas.width = targetW;
+      canvas.height = targetH;
+
+      const ctx = canvas.getContext("2d");
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+
+      if (type === "jpg") {
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      ctx.drawImage(img, 0, 0, targetW, targetH);
+
+      const mime = type === "png" ? "image/png" : "image/jpeg";
+      const quality = type === "jpg" ? JPG_QUALITY : undefined;
+      return await canvasToBlob(canvas, mime, quality);
+    }
+
+    async function renderRaster({ color, type }) {
+      const svgString = generateColoredSVGString(color);
+      return await renderRasterFromSVGString(svgString, type);
+    }
+
+    function downloadBlob(blob, filename) {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    /* ======================================================
+       EXPORT PNG / JPG (HD)
+       ====================================================== */
+    async function exportImage(type) {
+      const activity = activitySelect.value;
+      const color = getComputedStyle(document.documentElement)
+        .getPropertyValue("--logo-color")
+        .trim();
+
+      const blob = await renderRaster({ color, type });
+      const size = getExportSize();
+      downloadBlob(blob, `logo-${activity}-${size}px.${type}`);
+    }
+
+    document.getElementById("downloadPNG")
+      .addEventListener("click", () => exportImage("png"));
+
+    document.getElementById("downloadJPG")
+      .addEventListener("click", () => exportImage("jpg"));
+
+    /* ======================================================
+       EXPORT ZIP (activité courante) : PNG + JPG toutes couleurs
+       ====================================================== */
+    const yieldToUI = () => new Promise(r => setTimeout(r, 0));
+
+    async function downloadZIP() {
+      const activity = activitySelect.value;
+      const size = getExportSize();
+
+      const btn = document.getElementById("downloadZIP");
+      const old = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "Génération du ZIP…";
+
+      try {
+        const zip = new JSZip();
+        const folderPNG = zip.folder("PNG");
+        const folderJPG = zip.folder("JPG");
+
+        for (const [slug, hex] of Object.entries(EXPORT_COLORS)) {
+          const pngBlob = await renderRaster({ color: hex, type: "png" });
+          folderPNG.file(`logo-${activity}-${slug}-${size}px.png`, pngBlob);
+          await yieldToUI();
+
+          const jpgBlob = await renderRaster({ color: hex, type: "jpg" });
+          folderJPG.file(`logo-${activity}-${slug}-${size}px.jpg`, jpgBlob);
+          await yieldToUI();
+        }
+
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        downloadBlob(zipBlob, `logos-${activity}-PNG-JPG-${size}px.zip`);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = old;
+      }
+    }
+
+    document.getElementById("downloadZIP")
+      .addEventListener("click", downloadZIP);
+
+    /* ======================================================
+       ✅ NOUVEAU : ZIP HD des activités figées uniquement
+       Condition : editableZones est un tableau vide ([])
+       Structure ZIP :
+         ACTIVITY_KEY/
+            PNG/
+            JPG/
+       ====================================================== */
+
+    function isLockedActivity(activity) {
+      return Array.isArray(activity?.editableZones) && activity.editableZones.length === 0;
+    }
+
+    function applyPresetsOnClone(cloneSvg, presets) {
+      const circles = cloneSvg.querySelectorAll('circle[id^="Rond_"]');
+      circles.forEach(c => c.classList.remove("active", "circle-disabled"));
+
+      Object.entries(presets || {}).forEach(([zone, count]) => {
+        const zoneCircles = cloneSvg.querySelectorAll(`circle[id$="_${zone}"]`);
+        zoneCircles.forEach((c, idx) => {
+          if (idx < count) c.classList.add("active");
+        });
+      });
+
+      // visuel figé (optionnel)
+      circles.forEach(c => c.classList.add("circle-disabled"));
+    }
+
+    function generateLockedSVGString(activity, color) {
+      const clone = svg.cloneNode(true);
+
+      // Applique la config figée (presets)
+      applyPresetsOnClone(clone, activity.presets);
+
+      // Recoloration
+      clone.querySelectorAll("path").forEach(p => p.setAttribute("fill", color));
+      clone.querySelectorAll('circle[id^="Rond_"]').forEach(c => {
+        c.setAttribute("stroke", color);
+        c.setAttribute("fill", c.classList.contains("active") ? color : "none");
+      });
+
+      if (!clone.getAttribute("xmlns")) {
+        clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      }
+
+      return new XMLSerializer().serializeToString(clone);
+    }
+
+    async function downloadZIPLocked() {
+      const size = getExportSize();
+
+      const lockedEntries = Object.entries(ACTIVITIES).filter(([_, act]) => isLockedActivity(act));
+      if (lockedEntries.length === 0) {
+        alert("Aucune activité figée (editableZones = []) n'a été trouvée dans activities.js.");
+        return;
+      }
+
+      const btn = document.getElementById("downloadZIPLocked");
+      const old = btn.textContent;
+      btn.disabled = true;
+
+      try {
+        const totalFiles = lockedEntries.length * Object.keys(EXPORT_COLORS).length * 2;
+        let done = 0;
+        btn.textContent = `Génération… ${done}/${totalFiles}`;
+
+        const zip = new JSZip();
+
+        for (const [activityKey, activity] of lockedEntries) {
+          const activityFolder = zip.folder(activityKey);
+          const pngFolder = activityFolder.folder("PNG");
+          const jpgFolder = activityFolder.folder("JPG");
+
+          for (const [slug, hex] of Object.entries(EXPORT_COLORS)) {
+            const svgString = generateLockedSVGString(activity, hex);
+
+            const pngBlob = await renderRasterFromSVGString(svgString, "png");
+            pngFolder.file(`macaron-${activityKey}-${slug}-${size}px.png`, pngBlob);
+            done++;
+            btn.textContent = `Génération… ${done}/${totalFiles}`;
+            await yieldToUI();
+
+            const jpgBlob = await renderRasterFromSVGString(svgString, "jpg");
+            jpgFolder.file(`macaron-${activityKey}-${slug}-${size}px.jpg`, jpgBlob);
+            done++;
+            btn.textContent = `Génération… ${done}/${totalFiles}`;
+            await yieldToUI();
+          }
+        }
+
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        downloadBlob(zipBlob, `macarons-figes-PNG-JPG-toutes-couleurs-${size}px.zip`);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = old;
+      }
+    }
+
+    document.getElementById("downloadZIPLocked")
+      .addEventListener("click", downloadZIPLocked);
+
+    /* ======================================================
+       INITIALISATION
+       ====================================================== */
+    generateActivityMenu();
+    setUIColor(colorSelect.value);
+    applyActivity(activitySelect.value);
+
+    activitySelect.addEventListener("change", e => {
+      applyActivity(e.target.value);
+    });
+  </script>
 
 </body>
 </html>

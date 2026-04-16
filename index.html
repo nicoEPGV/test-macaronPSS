@@ -191,9 +191,22 @@
     }
 
     svg path{fill:var(--logo-color)}
-    circle{stroke:var(--logo-color);stroke-width:2}
-    circle.active{fill:var(--logo-color)}
-    .circle-disabled{opacity:.25;pointer-events:none}
+   circle{
+  stroke: var(--logo-color);
+  stroke-width: 2;
+  fill: none;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+circle.active{
+  fill: var(--logo-color);
+}
+
+.circle-disabled{
+  opacity: .25;
+  pointer-events: none;
+}
 
     /* ===== MOBILE ===== */
     @media(max-width:640px){

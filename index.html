@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -22,7 +22,9 @@
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      background-color: #f6f6f7; /* fallback */
+
+      /* fallback si l’image ne charge pas */
+      background-color: #f6f6f7;
     }
 
     .controls {
@@ -32,7 +34,7 @@
       flex-wrap: wrap;
       align-items: center;
 
-      /* ✅ neutralise l’influence du fond sur l’UI */
+      /* ✅ neutralise visuellement l’influence du fond */
       background: rgba(255, 255, 255, 0.92);
       padding: 1rem;
       border-radius: 12px;
@@ -45,19 +47,12 @@
     }
 
     .logo-wrapper {
-      max-width: 360px; /* desktop : compact */
+      max-width: 360px;
       margin: auto;
       background: rgba(255, 255, 255, 0.96);
       padding: 1rem;
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-    }
-
-    /* ✅ SVG responsive (même desktop : reste à 360px via wrapper) */
-    .logo-wrapper svg {
-      width: 100%;
-      height: auto;
-      display: block;
     }
 
     /* Logo */
@@ -82,59 +77,6 @@
       opacity: 0.25;
       cursor: not-allowed;
       pointer-events: none;
-    }
-
-    /* =========================
-       RESPONSIVE SMARTPHONE
-       - contrôles en colonne
-       - boutons pleine largeur
-       - logo en pleine largeur
-       ========================= */
-    @media (max-width: 640px) {
-      body {
-        padding: 1rem;
-        /* Optionnel si tu veux un peu plus de confort sur iPhone à encoche :
-        padding:
-          calc(1rem + env(safe-area-inset-top))
-          calc(1rem + env(safe-area-inset-right))
-          calc(1rem + env(safe-area-inset-bottom))
-          calc(1rem + env(safe-area-inset-left));
-        */
-        background-position: center;
-      }
-
-      .controls {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.75rem;
-        padding: 0.9rem;
-      }
-
-      .controls label {
-        display: flex;
-        flex-direction: column;
-        gap: 0.35rem;
-        width: 100%;
-      }
-
-      .controls select,
-      .controls button {
-        width: 100%;
-        font-size: 1rem;
-        padding: 0.75rem 0.9rem; /* tap-friendly */
-      }
-
-      /* ✅ Logo en pleine largeur sur mobile */
-      .logo-wrapper {
-        max-width: 100%;
-        width: 100%;
-        padding: 0.75rem;
-      }
-
-      .logo-wrapper svg {
-        width: 100%;
-        height: auto;
-      }
     }
   </style>
 </head>
@@ -173,11 +115,16 @@
     <button id="downloadPNG">Télécharger PNG</button>
     <button id="downloadJPG">Télécharger JPEG</button>
     <button id="downloadZIP">Télécharger ZIP (PNG+JPG toutes couleurs)</button>
+
+    <!-- ✅ NOUVEAU : ZIP des activités figées uniquement (editableZones vide) -->
+    <button id="downloadZIPLocked">
+      PNG et JPEG des macarons figés toutes couleurs fédérales
+    </button>
   </div>
 
   <!-- LOGO -->
   <div class="logo-wrapper">
-  <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="356px" height="356px" viewBox="0 0 356 356" enable-background="new 0 0 356 356" xml:space="preserve">
 <g id="PAS_CLIQUABLE">
 	<path id="logo_cardio" fill="#473AA5" d="M76.365,81.347c4.663-5.146,12.374-6.86,18.642-3.64c0.806,0.414,1.575,0.897,2.298,1.44
@@ -575,6 +522,10 @@
     const sizeSelect = document.getElementById("sizeSelect");
     const svg = document.querySelector("svg");
 
+    if (!svg) {
+      console.error("⚠️ Aucun <svg> trouvé dans la page. Remets ton SVG complet dans .logo-wrapper.");
+    }
+
     // Couleurs exportées dans le ZIP (les mêmes que ton select)
     const EXPORT_COLORS = {
       "jaune-energie": "#FF9400",
@@ -666,30 +617,24 @@
     function setUIColor(hex) {
       document.documentElement.style.setProperty("--logo-color", hex);
     }
-
     colorSelect.addEventListener("change", () => setUIColor(colorSelect.value));
 
     /* ======================================================
-       EXPORTS HD (source de vérité unique)
+       EXPORTS HD (activité courante)
        - prend l'état ACTUEL du logo (modifs utilisateur)
-       - recolore pour export
-       - rasterise à la résolution sélectionnée
        ====================================================== */
     function generateColoredSVGString(color) {
       const clone = svg.cloneNode(true);
 
-      // Remplissage des paths (logo + textes)
       clone.querySelectorAll("path").forEach(p => {
         p.setAttribute("fill", color);
       });
 
-      // Cercles : stroke + fill (active -> rempli, sinon none)
       clone.querySelectorAll('circle[id^="Rond_"]').forEach(c => {
         c.setAttribute("stroke", color);
         c.setAttribute("fill", c.classList.contains("active") ? color : "none");
       });
 
-      // Sécurise le namespace
       if (!clone.getAttribute("xmlns")) {
         clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
       }
@@ -728,8 +673,8 @@
       });
     }
 
-    async function renderRaster({ color, type }) {
-      const svgString = generateColoredSVGString(color);
+    // ✅ Rasterise à partir d’une SVG string (réutilisable pour “figé”)
+    async function renderRasterFromSVGString(svgString, type) {
       const img = await svgStringToImage(svgString);
 
       const vb = svg.viewBox?.baseVal;
@@ -758,6 +703,11 @@
       const mime = type === "png" ? "image/png" : "image/jpeg";
       const quality = type === "jpg" ? JPG_QUALITY : undefined;
       return await canvasToBlob(canvas, mime, quality);
+    }
+
+    async function renderRaster({ color, type }) {
+      const svgString = generateColoredSVGString(color);
+      return await renderRasterFromSVGString(svgString, type);
     }
 
     function downloadBlob(blob, filename) {
@@ -789,7 +739,7 @@
       .addEventListener("click", () => exportImage("jpg"));
 
     /* ======================================================
-       EXPORT ZIP (PNG + JPG toutes couleurs, sous-dossiers)
+       EXPORT ZIP (activité courante) : PNG + JPG toutes couleurs
        ====================================================== */
     const yieldToUI = () => new Promise(r => setTimeout(r, 0));
 
@@ -829,6 +779,107 @@
       .addEventListener("click", downloadZIP);
 
     /* ======================================================
+       ✅ NOUVEAU : ZIP HD des activités figées uniquement
+       Condition : editableZones est un tableau vide ([])
+       Structure ZIP :
+         ACTIVITY_KEY/
+            PNG/
+            JPG/
+       ====================================================== */
+
+    function isLockedActivity(activity) {
+      return Array.isArray(activity?.editableZones) && activity.editableZones.length === 0;
+    }
+
+    function applyPresetsOnClone(cloneSvg, presets) {
+      const circles = cloneSvg.querySelectorAll('circle[id^="Rond_"]');
+      circles.forEach(c => c.classList.remove("active", "circle-disabled"));
+
+      Object.entries(presets || {}).forEach(([zone, count]) => {
+        const zoneCircles = cloneSvg.querySelectorAll(`circle[id$="_${zone}"]`);
+        zoneCircles.forEach((c, idx) => {
+          if (idx < count) c.classList.add("active");
+        });
+      });
+
+      // visuel figé (optionnel)
+      circles.forEach(c => c.classList.add("circle-disabled"));
+    }
+
+    function generateLockedSVGString(activity, color) {
+      const clone = svg.cloneNode(true);
+
+      // Applique la config figée (presets)
+      applyPresetsOnClone(clone, activity.presets);
+
+      // Recoloration
+      clone.querySelectorAll("path").forEach(p => p.setAttribute("fill", color));
+      clone.querySelectorAll('circle[id^="Rond_"]').forEach(c => {
+        c.setAttribute("stroke", color);
+        c.setAttribute("fill", c.classList.contains("active") ? color : "none");
+      });
+
+      if (!clone.getAttribute("xmlns")) {
+        clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      }
+
+      return new XMLSerializer().serializeToString(clone);
+    }
+
+    async function downloadZIPLocked() {
+      const size = getExportSize();
+
+      const lockedEntries = Object.entries(ACTIVITIES).filter(([_, act]) => isLockedActivity(act));
+      if (lockedEntries.length === 0) {
+        alert("Aucune activité figée (editableZones = []) n'a été trouvée dans activities.js.");
+        return;
+      }
+
+      const btn = document.getElementById("downloadZIPLocked");
+      const old = btn.textContent;
+      btn.disabled = true;
+
+      try {
+        const totalFiles = lockedEntries.length * Object.keys(EXPORT_COLORS).length * 2;
+        let done = 0;
+        btn.textContent = `Génération… ${done}/${totalFiles}`;
+
+        const zip = new JSZip();
+
+        for (const [activityKey, activity] of lockedEntries) {
+          const activityFolder = zip.folder(activityKey);
+          const pngFolder = activityFolder.folder("PNG");
+          const jpgFolder = activityFolder.folder("JPG");
+
+          for (const [slug, hex] of Object.entries(EXPORT_COLORS)) {
+            const svgString = generateLockedSVGString(activity, hex);
+
+            const pngBlob = await renderRasterFromSVGString(svgString, "png");
+            pngFolder.file(`macaron-${activityKey}-${slug}-${size}px.png`, pngBlob);
+            done++;
+            btn.textContent = `Génération… ${done}/${totalFiles}`;
+            await yieldToUI();
+
+            const jpgBlob = await renderRasterFromSVGString(svgString, "jpg");
+            jpgFolder.file(`macaron-${activityKey}-${slug}-${size}px.jpg`, jpgBlob);
+            done++;
+            btn.textContent = `Génération… ${done}/${totalFiles}`;
+            await yieldToUI();
+          }
+        }
+
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        downloadBlob(zipBlob, `macarons-figes-PNG-JPG-toutes-couleurs-${size}px.zip`);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = old;
+      }
+    }
+
+    document.getElementById("downloadZIPLocked")
+      .addEventListener("click", downloadZIPLocked);
+
+    /* ======================================================
        INITIALISATION
        ====================================================== */
     generateActivityMenu();
@@ -842,4 +893,3 @@
 
 </body>
 </html>
-``

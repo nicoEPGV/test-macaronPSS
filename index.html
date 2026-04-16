@@ -86,12 +86,14 @@
 
     <button id="downloadPNG">Télécharger PNG</button>
     <button id="downloadJPG">Télécharger JPEG</button>
+
+    <!-- ✅ NOUVEAU BOUTON ZIP -->
+    <button id="downloadZIP">Télécharger ZIP (SVG toutes couleurs)</button>
   </div>
 
   <!-- LOGO -->
   <div class="logo-wrapper">
-<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+   <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="356px" height="356px" viewBox="0 0 356 356" enable-background="new 0 0 356 356" xml:space="preserve">
 <g id="PAS_CLIQUABLE">
 	<path id="logo_cardio" fill="#473AA5" d="M76.365,81.347c4.663-5.146,12.374-6.86,18.642-3.64c0.806,0.414,1.575,0.897,2.298,1.44
@@ -477,17 +479,27 @@
 		<circle id="Rond_5_SOUP" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="153.609" cy="193" r="11.338"/>
 </g>
 </svg>
-
   </div>
 
+  <!-- ✅ JSZip (lib ZIP) : à charger AVANT le module -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
-  <!-- ✅ SCRIPT MODULE (OBLIGATOIREMENT ICI, EN FIN DE BODY) -->
+  <!-- ✅ SCRIPT MODULE -->
   <script type="module">
     import { ACTIVITIES } from "./activities.js";
 
     const activitySelect = document.getElementById("activitySelect");
     const colorSelect = document.getElementById("colorSelect");
     const svg = document.querySelector("svg");
+
+    // ✅ Couleurs à exporter dans le ZIP (correspondent à ton select)
+    const EXPORT_COLORS = {
+      "jaune-energie": "#FF9400",
+      "pourpre-agile": "#B9009D",
+      "rose-tonus": "#FF0C6A",
+      "violet-intense": "#473AA5",
+      "bleu-flex": "#919CFF"
+    };
 
     /* ======================================================
        GÉNÉRATION AUTOMATIQUE DU MENU ACTIVITÉ
@@ -559,7 +571,7 @@
     }
 
     /* ======================================================
-       COULEUR
+       COULEUR (UI)
        ====================================================== */
     colorSelect.addEventListener("change", () => {
       document.documentElement
@@ -567,7 +579,7 @@
     });
 
     /* ======================================================
-       EXPORT
+       EXPORT PNG/JPG (existant)
        ====================================================== */
     function exportImage(type) {
       const clone = svg.cloneNode(true);
@@ -628,9 +640,73 @@
       .addEventListener("click", () => exportImage("jpg"));
 
     /* ======================================================
+       ✅ EXPORT ZIP (SVG toutes couleurs)
+       ====================================================== */
+
+    // Génère une chaîne SVG colorée (avec cercles actifs/inactifs)
+    function generateColoredSVG(color) {
+      const clone = svg.cloneNode(true);
+
+      // Couleur des paths
+      clone.querySelectorAll("path").forEach(p => {
+        p.setAttribute("fill", color);
+      });
+
+      // Couleur/stroke + fill conditionnel des cercles
+      clone.querySelectorAll('circle[id^="Rond_"]').forEach(c => {
+        c.setAttribute("stroke", color);
+        c.setAttribute(
+          "fill",
+          c.classList.contains("active") ? color : "none"
+        );
+      });
+
+      // Optionnel mais propre : s’assurer que le SVG a bien xmlns
+      if (!clone.getAttribute("xmlns")) {
+        clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      }
+
+      const serializer = new XMLSerializer();
+      return serializer.serializeToString(clone);
+    }
+
+    async function downloadZIP() {
+      // JSZip est chargé en script classique => accessible via window.JSZip
+      const JSZipLib = window.JSZip;
+      if (!JSZipLib) {
+        alert("JSZip n'est pas chargé. Vérifie le script CDN.");
+        return;
+      }
+
+      const zip = new JSZipLib();
+      const activity = activitySelect.value;
+
+      // Ajoute un fichier SVG par couleur
+      for (const [slug, hex] of Object.entries(EXPORT_COLORS)) {
+        const svgContent = generateColoredSVG(hex);
+        zip.file(`logo-${activity}-${slug}.svg`, svgContent);
+      }
+
+      const blob = await zip.generateAsync({ type: "blob" });
+
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `logos-${activity}-svg-couleurs.zip`;
+      link.click();
+
+      URL.revokeObjectURL(link.href);
+    }
+
+    document
+      .getElementById("downloadZIP")
+      .addEventListener("click", downloadZIP);
+
+    /* ======================================================
        INITIALISATION
        ====================================================== */
     generateActivityMenu();
+
+    // ⚠️ Important : après génération du menu, on applique une activité
     applyActivity(activitySelect.value);
 
     activitySelect.addEventListener("change", e => {
@@ -640,5 +716,4 @@
 
 </body>
 </html>
-
-
+``

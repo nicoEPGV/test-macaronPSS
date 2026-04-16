@@ -6,9 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
   <style>
-    :root {
-      --logo-color: #473AA5;
-    }
+    :root { --logo-color: #473AA5; }
 
     body {
       font-family: system-ui, sans-serif;
@@ -38,9 +36,7 @@
     }
 
     /* Logo */
-    svg path {
-      fill: var(--logo-color);
-    }
+    svg path { fill: var(--logo-color); }
 
     /* Cercles */
     circle[id^="Rond_"] {
@@ -51,9 +47,7 @@
       transition: opacity 0.2s ease, fill 0.2s ease;
     }
 
-    circle[id^="Rond_"].active {
-      fill: var(--logo-color);
-    }
+    circle[id^="Rond_"].active { fill: var(--logo-color); }
 
     .circle-disabled {
       opacity: 0.25;
@@ -84,14 +78,26 @@
       </select>
     </label>
 
+    <!-- ✅ NOUVEAU : menu résolution placé après la couleur -->
+    <label>
+      Résolution export :
+      <select id="sizeSelect">
+        <option value="1024">1024 px</option>
+        <option value="2048" selected>2048 px (HD)</option>
+        <option value="4096">4096 px (Très HD)</option>
+      </select>
+    </label>
+
     <button id="downloadPNG">Télécharger PNG</button>
     <button id="downloadJPG">Télécharger JPEG</button>
+
+    <!-- ✅ NOUVEAU : ZIP PNG + JPG toutes couleurs -->
+    <button id="downloadZIP">Télécharger ZIP (PNG+JPG toutes couleurs)</button>
   </div>
 
   <!-- LOGO -->
   <div class="logo-wrapper">
-<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+ <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="356px" height="356px" viewBox="0 0 356 356" enable-background="new 0 0 356 356" xml:space="preserve">
 <g id="PAS_CLIQUABLE">
 	<path id="logo_cardio" fill="#473AA5" d="M76.365,81.347c4.663-5.146,12.374-6.86,18.642-3.64c0.806,0.414,1.575,0.897,2.298,1.44
@@ -477,17 +483,34 @@
 		<circle id="Rond_5_SOUP" fill="none" stroke="#473AAD" stroke-width="2" stroke-miterlimit="10" cx="153.609" cy="193" r="11.338"/>
 </g>
 </svg>
-
   </div>
-
 
   <!-- ✅ SCRIPT MODULE (OBLIGATOIREMENT ICI, EN FIN DE BODY) -->
   <script type="module">
     import { ACTIVITIES } from "./activities.js";
+    import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
 
     const activitySelect = document.getElementById("activitySelect");
     const colorSelect = document.getElementById("colorSelect");
+    const sizeSelect = document.getElementById("sizeSelect");
     const svg = document.querySelector("svg");
+
+    // Couleurs exportées dans le ZIP (reprend tes options)
+    const EXPORT_COLORS = {
+      "jaune-energie": "#FF9400",
+      "pourpre-agile": "#B9009D",
+      "rose-tonus": "#FF0C6A",
+      "violet-intense": "#473AA5",
+      "bleu-flex": "#919CFF"
+    };
+
+    // Qualité JPEG (compression). La “HD” vient surtout de la résolution.
+    const JPG_QUALITY = 0.95;
+
+    function getExportSize() {
+      const v = parseInt(sizeSelect.value, 10);
+      return Number.isFinite(v) ? v : 2048;
+    }
 
     /* ======================================================
        GÉNÉRATION AUTOMATIQUE DU MENU ACTIVITÉ
@@ -519,7 +542,7 @@
     });
 
     /* ======================================================
-       LOGIQUE MÉTIER
+       LOGIQUE MÉTIER (respect activities.js)
        ====================================================== */
     function resetCercles() {
       cercles.forEach(c => {
@@ -529,9 +552,7 @@
 
     function applyPresets(presets) {
       Object.entries(presets).forEach(([zone, count]) => {
-        const zoneCircles = document.querySelectorAll(
-          `circle[id$="_${zone}"]`
-        );
+        const zoneCircles = document.querySelectorAll(`circle[id$="_${zone}"]`);
 
         zoneCircles.forEach((cercle, index) => {
           cercle.classList.add("circle-disabled");
@@ -544,6 +565,7 @@
 
     function applyActivity(activityKey) {
       const activity = ACTIVITIES[activityKey];
+      if (!activity) return;
 
       resetCercles();
       applyPresets(activity.presets);
@@ -559,66 +581,126 @@
     }
 
     /* ======================================================
-       COULEUR
+       COULEUR (UI)
        ====================================================== */
-    colorSelect.addEventListener("change", () => {
-      document.documentElement
-        .style.setProperty("--logo-color", colorSelect.value);
-    });
+    function setUIColor(hex) {
+      document.documentElement.style.setProperty("--logo-color", hex);
+    }
+
+    colorSelect.addEventListener("change", () => setUIColor(colorSelect.value));
 
     /* ======================================================
-       EXPORT
+       EXPORTS HD (source de vérité unique)
+       - prend l'état ACTUEL du logo (modifs utilisateur)
+       - recolore pour export
+       - rasterise à la résolution sélectionnée
        ====================================================== */
-    function exportImage(type) {
+
+    function generateColoredSVGString(color) {
       const clone = svg.cloneNode(true);
-      const couleur = getComputedStyle(document.documentElement)
-        .getPropertyValue("--logo-color").trim();
 
+      // Remplissage des paths (logo + textes)
       clone.querySelectorAll("path").forEach(p => {
-        p.setAttribute("fill", couleur);
+        p.setAttribute("fill", color);
       });
 
+      // Cercles : stroke + fill (active -> rempli, sinon none)
       clone.querySelectorAll('circle[id^="Rond_"]').forEach(c => {
-        c.setAttribute("stroke", couleur);
-        c.setAttribute(
-          "fill",
-          c.classList.contains("active") ? couleur : "none"
-        );
+        c.setAttribute("stroke", color);
+        c.setAttribute("fill", c.classList.contains("active") ? color : "none");
       });
 
-      const serializer = new XMLSerializer();
-      const blob = new Blob(
-        [serializer.serializeToString(clone)],
-        { type: "image/svg+xml;charset=utf-8" }
-      );
+      // Sécurise le namespace
+      if (!clone.getAttribute("xmlns")) {
+        clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      }
 
-      const img = new Image();
-      const url = URL.createObjectURL(blob);
+      return new XMLSerializer().serializeToString(clone);
+    }
 
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = svg.viewBox.baseVal.width;
-        canvas.height = svg.viewBox.baseVal.height;
-        const ctx = canvas.getContext("2d");
+    function svgStringToImage(svgString) {
+      return new Promise((resolve, reject) => {
+        const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
 
-        if (type === "jpg") {
-          ctx.fillStyle = "#fff";
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
+        const img = new Image();
+        img.decoding = "async";
 
-        ctx.drawImage(img, 0, 0);
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          resolve(img);
+        };
 
-        const a = document.createElement("a");
-        a.href = canvas.toDataURL(
-          type === "png" ? "image/png" : "image/jpeg", 0.95
-        );
-        a.download = `logo-${activitySelect.value}.${type}`;
-        a.click();
+        img.onerror = (e) => {
+          URL.revokeObjectURL(url);
+          reject(e);
+        };
 
-        URL.revokeObjectURL(url);
-      };
+        img.src = url;
+      });
+    }
 
-      img.src = url;
+    function canvasToBlob(canvas, mime, quality) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(b => {
+          if (!b) reject(new Error("canvas.toBlob a retourné null (mémoire / canvas trop grand)."));
+          else resolve(b);
+        }, mime, quality);
+      });
+    }
+
+    async function renderRaster({ color, type }) {
+      const svgString = generateColoredSVGString(color);
+      const img = await svgStringToImage(svgString);
+
+      const vb = svg.viewBox?.baseVal;
+      const baseW = vb?.width || svg.width?.baseVal?.value || 356;
+      const baseH = vb?.height || svg.height?.baseVal?.value || 356;
+
+      const size = getExportSize();
+      const targetW = size;
+      const targetH = Math.round(size * (baseH / baseW)); // ici carré -> size
+
+      const canvas = document.createElement("canvas");
+      canvas.width = targetW;
+      canvas.height = targetH;
+
+      const ctx = canvas.getContext("2d");
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+
+      if (type === "jpg") {
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      ctx.drawImage(img, 0, 0, targetW, targetH);
+
+      const mime = type === "png" ? "image/png" : "image/jpeg";
+      const quality = type === "jpg" ? JPG_QUALITY : undefined;
+      return await canvasToBlob(canvas, mime, quality);
+    }
+
+    function downloadBlob(blob, filename) {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    /* ======================================================
+       EXPORT PNG / JPG (HD)
+       ====================================================== */
+    async function exportImage(type) {
+      const activity = activitySelect.value;
+      const color = getComputedStyle(document.documentElement)
+        .getPropertyValue("--logo-color")
+        .trim();
+
+      const blob = await renderRaster({ color, type });
+      const size = getExportSize();
+      downloadBlob(blob, `logo-${activity}-${size}px.${type}`);
     }
 
     document.getElementById("downloadPNG")
@@ -628,16 +710,67 @@
       .addEventListener("click", () => exportImage("jpg"));
 
     /* ======================================================
+       EXPORT ZIP (PNG + JPG toutes couleurs, sous-dossiers)
+       - respecte modifs utilisateur (cercles actifs)
+       - respecte activité (presets + zones)
+       - respecte résolution choisie
+       ====================================================== */
+    const yieldToUI = () => new Promise(r => setTimeout(r, 0));
+
+    async function downloadZIP() {
+      const activity = activitySelect.value;
+      const size = getExportSize();
+
+      const btn = document.getElementById("downloadZIP");
+      const old = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "Génération du ZIP…";
+
+      try {
+        const zip = new JSZip();
+        const folderPNG = zip.folder("PNG");
+        const folderJPG = zip.folder("JPG");
+
+        for (const [slug, hex] of Object.entries(EXPORT_COLORS)) {
+          // PNG
+          const pngBlob = await renderRaster({ color: hex, type: "png" });
+          folderPNG.file(`logo-${activity}-${slug}-${size}px.png`, pngBlob);
+          await yieldToUI();
+
+          // JPG
+          const jpgBlob = await renderRaster({ color: hex, type: "jpg" });
+          folderJPG.file(`logo-${activity}-${slug}-${size}px.jpg`, jpgBlob);
+          await yieldToUI();
+        }
+
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        downloadBlob(zipBlob, `logos-${activity}-PNG-JPG-${size}px.zip`);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = old;
+      }
+    }
+
+    document.getElementById("downloadZIP")
+      .addEventListener("click", downloadZIP);
+
+    /* ======================================================
        INITIALISATION
        ====================================================== */
     generateActivityMenu();
+
+    // Applique la couleur initiale du select
+    setUIColor(colorSelect.value);
+
+    // Applique l'activité initiale (presets + restrictions)
     applyActivity(activitySelect.value);
 
     activitySelect.addEventListener("change", e => {
       applyActivity(e.target.value);
     });
+
   </script>
 
 </body>
 </html>
-
+``

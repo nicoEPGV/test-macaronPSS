@@ -6,7 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
   <style>
-    :root { --logo-color: #473AA5; }
+    :root {
+      --logo-color: #473AA5;
+      --ui-neutral: #f6f6f7;
+      --ui-gray: #d0d0d5;
+    }
 
     body {
       font-family: system-ui, sans-serif;
@@ -18,32 +22,34 @@
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      background-color:#f6f6f7;
+      background-color: var(--ui-neutral);
     }
 
-    /* ========= LAYOUT ========= */
+    /* ====== LAYOUT ====== */
     .page {
       max-width: 1200px;
       margin: auto;
     }
 
-    @media (min-width: 1024px){
-  .page {
-    display:grid;
-    grid-template-columns:420px 1fr;
-    gap:1.25rem;
-    align-items:start;
-  }
-}
+    @media (min-width:1024px){
+      .page{
+        display:grid;
+        grid-template-columns:420px 1fr;
+        gap:1.25rem;
+        align-items:start;
+      }
+    }
 
-    /* ========= TUTORIEL PC ========= */
+    /* ====== TUTORIEL PC ====== */
     .tutoriel-desktop{
       display:none;
-      background:rgba(255,255,255,.92);
+      background:white;
       border-radius:12px;
-      padding:1rem;
+      padding:1.25rem;
+      border-left:8px solid var(--logo-color);
       box-shadow:0 10px 30px rgba(0,0,0,.06);
     }
+
     @media (min-width:1024px){
       .tutoriel-desktop{
         display:block;
@@ -53,84 +59,158 @@
         overflow:auto;
       }
     }
-    .tutoriel-desktop h2{margin:0 0 .75rem;font-size:1.05rem}
-    .tutoriel-desktop p{margin:.5rem 0;font-size: 1rem;line-height:1.45}
-    .tutoriel-desktop .note{
-      margin-top:.75rem;
-      padding-top:.75rem;
-      border-top:1px solid rgba(0,0,0,.08);
-      font-weight:600;
+
+    .tutoriel-desktop h2{
+      margin:0 0 1rem;
+      font-size:1.15rem;
     }
 
-    /* ========= AIDE MOBILE ========= */
+    .tutoriel-desktop strong{
+      color:var(--logo-color);
+    }
+
+    .tutoriel-desktop p{
+      margin:.55rem 0;
+      font-size:1rem;
+      line-height:1.45;
+    }
+
+    /* ====== AIDE MOBILE ====== */
     .aide-mobile{
       display:block;
-      background:rgba(255,255,255,.92);
+      background:white;
       border-radius:12px;
       padding:.75rem 1rem;
       margin-bottom:1rem;
+      border-left:6px solid var(--logo-color);
       box-shadow:0 10px 30px rgba(0,0,0,.06);
     }
+
     .aide-mobile summary{
       cursor:pointer;
       font-weight:700;
     }
+
     .aide-mobile summary::-webkit-details-marker{display:none}
-    .aide-content p{margin:.4rem 0;font-size:.95rem;line-height:1.35}
-    .aide-content .note{
-      margin-top:.6rem;
-      padding-top:.6rem;
-      border-top:1px solid rgba(0,0,0,.08);
-      font-weight:600;
+
+    .aide-content p{
+      margin:.4rem 0;
+      font-size:.95rem;
+      line-height:1.35;
     }
+
     @media (min-width:1024px){
       .aide-mobile{display:none}
     }
 
-    /* ========= CONTROLES ========= */
+    /* ====== CONTROLES ====== */
     .controls{
       display:flex;
       gap:1rem;
       flex-wrap:wrap;
       align-items:center;
-      background:rgba(255,255,255,.92);
+      background:white;
       padding:1rem;
       border-radius:12px;
       box-shadow:0 10px 30px rgba(0,0,0,.06);
       margin-bottom:1rem;
     }
-    select,button{padding:.5rem .8rem;font-size:1rem}
 
-    /* ========= LOGO ========= */
+    label{
+      display:flex;
+      flex-direction:column;
+      font-size:.9rem;
+    }
+
+    select, button{
+      padding:.55rem .8rem;
+      font-size:1rem;
+      border-radius:8px;
+      border:2px solid var(--ui-gray);
+      transition:all .2s ease;
+    }
+
+    select:focus{
+      outline:none;
+      border-color:var(--logo-color);
+    }
+
+    /* ====== BOUTONS ====== */
+    .btn-primary{
+      background:var(--logo-color);
+      color:white;
+      font-weight:600;
+      border:none;
+    }
+
+    .btn-primary:hover{
+      opacity:.9;
+    }
+
+    .btn-secondary{
+      background:white;
+      color:var(--logo-color);
+      border:2px solid var(--logo-color);
+    }
+
+    .btn-secondary:hover{
+      background:rgba(0,0,0,.03);
+    }
+
+    .btn-institutional{
+      background:white;
+      border:2px solid var(--ui-gray);
+      color:#444;
+      font-size:.9rem;
+    }
+
+    /* ====== LOGO ====== */
     .logo-wrapper{
       max-width:360px;
       margin:auto;
-      background:rgba(255,255,255,.96);
+      background:white;
       padding:1rem;
-      border-radius:12px;
-      box-shadow:0 10px 30px rgba(0,0,0,.06);
+      border-radius:16px;
+      box-shadow:0 14px 40px rgba(0,0,0,.09);
     }
-    .logo-wrapper svg{width:100%;height:auto;display:block}
-    svg path{fill:var(--logo-color)}
 
-    circle[id^="Rond_"]{
-      fill:transparent;
+    .logo-wrapper svg{
+      width:100%;
+      height:auto;
+      display:block;
+    }
+
+    svg path{
+      fill:var(--logo-color);
+    }
+
+    circle{
       stroke:var(--logo-color);
       stroke-width:2;
-      cursor:pointer
     }
-    circle.active{fill:var(--logo-color)}
+
+    circle.active{
+      fill:var(--logo-color);
+    }
+
     .circle-disabled{
       opacity:.25;
       pointer-events:none;
-      cursor:not-allowed;
     }
 
+    /* ====== MOBILE ====== */
     @media(max-width:640px){
       body{padding:1rem}
-      .controls{flex-direction:column;align-items:stretch}
-      .controls select,.controls button{width:100%;padding:.75rem}
-      .logo-wrapper{max-width:100%}
+      .controls{
+        flex-direction:column;
+        align-items:stretch;
+      }
+      select,button{
+        width:100%;
+      }
+      .logo-wrapper{
+        max-width:100%;
+      }
     }
   </style>
 </head>
@@ -139,83 +219,55 @@
 
 <div class="page">
 
-  <!-- TUTORIEL PC -->
-  <aside class="tutoriel-desktop" aria-label="Tutoriel d'utilisation">
-  <h2>Mode d’emploi</h2>
-
-  <p><strong>🟦 1) Créer le macaron</strong></p>
-  <p>
-    <strong>Activité / Programme</strong> : choisis dans la liste.<br>
-  <p>
-	  
-	  <p><strong>🎨 2) Choisir une couleur</strong></p>
-  <p>
-    Sélectionne une <strong>couleur fédérale</strong> pour harmoniser tes supports.
-  </p>
-	  
-    <strong>✏️ 3)Remplir ton macaron</strong> : clique pour remplir/vider uniquement
-    les cercles autorisés <em>(cercles grisés = verrouillés)</em>.
-  </p>
-  <p><strong>📐 4) Choisir une résolution (HD)</strong></p>
-  <p>
-    • <strong>1024 px</strong> : web léger<br>
-    • <strong>2048 px (recommandé)</strong> : qualité HD (réseaux + affichage)<br>
-    • <strong>4096 px</strong> : très HD (plus long à générer)
-  </p>
-
-  <p><strong>⬇️ 5) Télécharger</strong></p>
-  <p>
-    • <strong>PNG</strong> : fond transparent (visuels / montage)<br>
-    • <strong>JPEG</strong> : fond blanc (Word / e‑mail)<br>
-    • <strong>ZIP activité (PNG+JPG toutes couleurs)</strong> : pack complet
-    de l’activité sélectionnée<br>
-    • <strong>ZIP PACK macarons figés…</strong> :
-    Pack officiel DTN <strong>non modifiable</strong> (activités verrouillées),
-   en PNG & JPEG pour toutes couleurs
-  </p>
-</aside>
-  <!-- OUTIL -->
-  <main>
-
-    <!-- AIDE MOBILE -->
-    <details class="aide-mobile">
-  <summary>📘 Aide / Mode d’emploi</summary>
-  <div class="aide-content">
+  <!-- ====== TUTORIEL PC ====== -->
+  <aside class="tutoriel-desktop">
+    <h2>Mode d’emploi</h2>
 
     <p><strong>🟦 1) Créer le macaron</strong><br>
       Activité / Programme : choisis dans la liste.<br>
       Pastilles : clique sur les cercles autorisés
-      <em>(gris = verrouillé)</em>.
+      <em>(cercles grisés = verrouillés)</em>.
     </p>
 
-    <p><strong>🎨 2) Couleur</strong><br>
-      Choisis une couleur fédérale.
+    <p><strong>🎨 2) Choisir une couleur</strong><br>
+      Sélectionne une couleur fédérale.
     </p>
 
-    <p><strong>📐 3) Résolution</strong><br>
-      1024 px : web<br>
-      2048 px : recommandé<br>
+    <p><strong>📐 3) Choisir une résolution (HD)</strong><br>
+      1024 px : web léger<br>
+      2048 px (recommandé)<br>
       4096 px : très HD (plus long)
     </p>
 
     <p><strong>⬇️ 4) Télécharger</strong><br>
       PNG : transparent<br>
       JPEG : fond blanc<br>
-      ZIP : pack complet<br>
-      ZIP macarons figés : pack officiel non modifiable
-		Attention : fichier lourd pour smartphone
+      ZIP activité : pack complet<br>
+      ZIP macarons figés : officiel 🔒
     </p>
+  </aside>
 
-  </div>
-</details>
+  <!-- ====== OUTIL ====== -->
+  <main>
+
+    <!-- AIDE MOBILE -->
+    <details class="aide-mobile">
+      <summary>📘 Aide / Mode d’emploi</summary>
+      <div class="aide-content">
+        <p><strong>1)</strong> Choisir activité</p>
+        <p><strong>2)</strong> Ajuster si autorisé</p>
+        <p><strong>3)</strong> Choisir couleur & résolution</p>
+        <p><strong>4)</strong> Exporter</p>
+      </div>
+    </details>
 
     <!-- CONTROLES -->
     <div class="controls">
-      <label>Activité :
+      <label>Activité
         <select id="activitySelect"></select>
       </label>
 
-      <label>Couleur :
+      <label>Couleur
         <select id="colorSelect">
           <option value="#FF9400">Jaune énergie</option>
           <option value="#B9009D">Pourpre agile</option>
@@ -225,7 +277,7 @@
         </select>
       </label>
 
-      <label>Résolution :
+      <label>Résolution
         <select id="sizeSelect">
           <option value="1024">1024</option>
           <option value="2048" selected>2048 HD</option>
@@ -233,15 +285,15 @@
         </select>
       </label>
 
-      <button id="downloadPNG">PNG</button>
-      <button id="downloadJPG">JPEG</button>
-      <button id="downloadZIP">ZIP activité</button>
-      <button id="downloadZIPLocked">ZIP PACK macarons figés</button>
+      <button class="btn-secondary" id="downloadPNG">PNG</button>
+      <button class="btn-secondary" id="downloadJPG">JPEG</button>
+      <button class="btn-primary" id="downloadZIP">ZIP activité</button>
+      <button class="btn-institutional" id="downloadZIPLocked">🔒 ZIP macarons figés</button>
     </div>
 
     <!-- LOGO -->
     <div class="logo-wrapper">
-      <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    <svg version="1.1" id="MACARON" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="356px" height="356px" viewBox="0 0 356 356" enable-background="new 0 0 356 356" xml:space="preserve">
 <g id="PAS_CLIQUABLE">
 	<path id="logo_cardio" fill="#473AA5" d="M76.365,81.347c4.663-5.146,12.374-6.86,18.642-3.64c0.806,0.414,1.575,0.897,2.298,1.44
@@ -634,68 +686,23 @@
 
 <script type="module">
   import { ACTIVITIES } from "./activities.js";
-  import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
 
   const activitySelect = document.getElementById("activitySelect");
   const colorSelect = document.getElementById("colorSelect");
-  const sizeSelect = document.getElementById("sizeSelect");
-  const svg = document.querySelector("svg");
-  const cercles = document.querySelectorAll('circle[id^="Rond_"]');
 
-  function generateActivityMenu(){
-    activitySelect.innerHTML="";
-    Object.entries(ACTIVITIES)
-      .sort((a,b)=>a[1].label.localeCompare(b[1].label,"fr"))
-      .forEach(([key,a])=>{
-        const opt=document.createElement("option");
-        opt.value=key;
-        opt.textContent=a.label;
-        activitySelect.appendChild(opt);
-      });
-  }
-
-  function resetCercles(){
-    cercles.forEach(c=>{
-      c.classList.remove("active","circle-disabled");
+  Object.entries(ACTIVITIES)
+    .sort((a,b)=>a[1].label.localeCompare(b[1].label,"fr"))
+    .forEach(([key,a])=>{
+      const o=document.createElement("option");
+      o.value=key;
+      o.textContent=a.label;
+      activitySelect.appendChild(o);
     });
-  }
-
-  function applyPresets(presets){
-    Object.entries(presets).forEach(([zone,count])=>{
-      const z=document.querySelectorAll(`circle[id$="_${zone}"]`);
-      z.forEach((c,i)=>{
-        c.classList.add("circle-disabled");
-        if(i<count) c.classList.add("active");
-      });
-    });
-  }
-
-  function applyActivity(key){
-    const a=ACTIVITIES[key];
-    resetCercles();
-    applyPresets(a.presets);
-    cercles.forEach(c=>{
-      const z=c.id.split("_").pop();
-      if(a.editableZones.includes(z)) c.classList.remove("circle-disabled");
-      else c.classList.add("circle-disabled");
-    });
-  }
-
-  cercles.forEach(c=>{
-    c.addEventListener("click",()=>{
-      if(!c.classList.contains("circle-disabled")) c.classList.toggle("active");
-    });
-  });
 
   colorSelect.addEventListener("change",()=>{
     document.documentElement.style.setProperty("--logo-color",colorSelect.value);
   });
-
-  generateActivityMenu();
-  applyActivity(activitySelect.value);
-  activitySelect.addEventListener("change",e=>applyActivity(e.target.value));
 </script>
 
 </body>
 </html>
-``

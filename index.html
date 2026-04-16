@@ -681,145 +681,234 @@
 </div>
 
 <script type="module">
-  import { ACTIVITIES } from "./activities.js";
+/* =========================================================
+   CHARGEMENT DES ACTIVITÉS (ROBUSTE)
+========================================================= */
+let ACTIVITIES;
+try {
+  ({ ACTIVITIES } = await import("./activities.js"));
+} catch (e) {
+  console.error(e);
+  alert(
+    "Impossible de charger activities.js.\n" +
+    "• Vérifie le chemin\n" +
+    "• Ouvre la page via http(s) (GitHub Pages ou serveur local)"
+  );
+  throw e;
+}
 
-  // ====== Sélecteurs UI ======
-  const activitySelect = document.getElementById("activitySelect");
-  const colorSelect    = document.getElementById("colorSelect");
-  const sizeSelect     = document.getElementById("sizeSelect");
-  const statusEl       = document.getElementById("status");
+/* =========================================================
+   SÉLECTEURS UI
+========================================================= */
+const activitySelect = document.getElementById("activitySelect");
+const colorSelect    = document.getElementById("colorSelect");
+const sizeSelect     = document.getElementById("sizeSelect");
+const statusEl       = document.getElementById("status");
 
-  const btnPNG   = document.getElementById("downloadPNG");
-  const btnJPG   = document.getElementById("downloadJPG");
-  const btnZIP   = document.getElementById("downloadZIP");
-  const btnLOCK  = document.getElementById("downloadZIPLocked");
+const btnPNG  = document.getElementById("downloadPNG");
+const btnJPG  = document.getElementById("downloadJPG");
+const btnZIP  = document.getElementById("downloadZIP");
+const btnLOCK = document.getElementById("downloadZIPLocked");
 
-  // Couleurs fédérales (utilisées pour les ZIP)
-  const EXPORT_COLORS = {
-    "jaune-energie": "#FF9400",
-    "pourpre-agile": "#B9009D",
-    "rose-tonus": "#FF0C6A",
-    "violet-intense": "#473AA5",
-    "bleu-flex": "#919CFF"
-  };
+/* =========================================================
+   CONSTANTES
+========================================================= */
+const EXPORT_COLORS = {
+  "jaune-energie": "#FF9400",
+  "pourpre-agile": "#B9009D",
+  "rose-tonus": "#FF0C6A",
+  "violet-intense": "#473AA5",
+  "bleu-flex": "#919CFF"
+};
+const JPG_QUALITY = 0.95;
 
-  const JPG_QUALITY = 0.95;
+/* =========================================================
+   OUTILS UI
+========================================================= */
+const setStatus = (t="") => statusEl && (statusEl.textContent = t);
 
-  // ====== Utils UI ======
-  function setStatus(msg=""){ statusEl.textContent = msg; }
-  function setBusy(isBusy, msg=""){
-    btnPNG.disabled = isBusy;
-    btnJPG.disabled = isBusy;
-    btnZIP.disabled = isBusy;
-    btnLOCK.disabled = isBusy;
-    setStatus(msg);
-  }
+function setBusy(busy, msg=""){
+  [btnPNG,btnJPG,btnZIP,btnLOCK].forEach(b=>b && (b.disabled = busy));
+  setStatus(msg);
+}
 
-  function getExportSize(){
-    const v = parseInt(sizeSelect.value, 10);
-    return Number.isFinite(v) ? v : 2048;
-  }
+const getExportSize = () =>
+  Number.parseInt(sizeSelect?.value ?? "2048",10) || 2048;
 
-  function setUIColor(hex){
-    document.documentElement.style.setProperty("--logo-color", hex);
-  }
+const setUIColor = hex =>
+  document.documentElement.style.setProperty("--logo-color", hex);
 
-  // ====== SVG helpers ======
-  function getSVG(){
-    return document.querySelector(".logo-wrapper svg");
-  }
+/* =========================================================
+   SVG HELPERS
+========================================================= */
+const getSVG = () => document.querySelector(".logo-wrapper svg");
+const getCircles = () => document.querySelectorAll('circle[id^="Rond_"]');
 
-  function getCircles(){
-    return document.querySelectorAll('circle[id^="Rond_"]');
-  }
+function ensureSVG(){
+  const svg = getSVG();
+  if(!svg) throw new Error("SVG manquant");
+  if(!getCircles().length) throw new Error("Aucun cercle Rond_ trouvé");
+  return svg;
+}
 
-  function ensureSVG(){
-    const svg = getSVG();
-    if(!svg){
-      alert("⚠️ SVG manquant : colle ton <svg>…</svg> dans la zone logo-wrapper.");
-      throw new Error("SVG manquant");
-    }
-    const circles = getCircles();
-    if(!circles.length){
-      alert("⚠️ Aucun cercle cliquable trouvé (id^='Rond_'). Vérifie les IDs dans ton SVG.");
-      throw new Error("Cercles manquants");
-    }
-    return svg;
-  }
+/* =========================================================
+   MENU ACTIVITÉS
+========================================================= */
+function generateActivityMenu(){
+  activitySelect.innerHTML = "";
+  Object.entries(ACTIVITIES)
+    .sort((a,b)=>a[1].label.localeCompare(b[1].label,"fr"))
+    .forEach(([key,a])=>{
+      const o = document.createElement("option");
+      o.value = key;
+      o.textContent = a.label;
+      activitySelect.appendChild(o);
+    });
+}
 
-  // ====== Menu activités ======
-  function generateActivityMenu(){
-    activitySelect.innerHTML = "";
-    Object.entries(ACTIVITIES)
-      .sort((a,b)=>a[1].label.localeCompare(b[1].label,"fr"))
-      .forEach(([key,a])=>{
-        const opt = document.createElement("option");
-        opt.value = key;
-        opt.textContent = a.label;
-        activitySelect.appendChild(opt);
-      });
-  }
+/* =========================================================
+   LOGIQUE MACARON
+========================================================= */
+function resetCercles(){
+  getCircles().forEach(c=>c.classList.remove("active","circle-disabled"));
+}
 
-  // ====== Logique activité / restrictions ======
-  function resetCercles(){
-    getCircles().forEach(c=>c.classList.remove("active","circle-disabled"));
-  }
-
-  function applyPresets(presets){
-    Object.entries(presets || {}).forEach(([zone,count])=>{
-      document.querySelectorAll(`circle[id$="_${zone}"]`).forEach((c,i)=>{
+function applyPresets(presets){
+  Object.entries(presets||{}).forEach(([zone,count])=>{
+    document.querySelectorAll(`circle[id$="_${zone}"]`)
+      .forEach((c,i)=>{
         c.classList.add("circle-disabled");
-        if(i < count) c.classList.add("active");
+        if(i<count) c.classList.add("active");
       });
-    });
+  });
+}
+
+function applyActivity(key){
+  const a = ACTIVITIES[key];
+  if(!a || !getSVG()) return;
+
+  resetCercles();
+  applyPresets(a.presets);
+
+  getCircles().forEach(c=>{
+    const z = c.id.split("_").pop();
+    a.editableZones?.includes(z)
+      ? c.classList.remove("circle-disabled")
+      : c.classList.add("circle-disabled");
+  });
+}
+
+/* clics cercles */
+document.addEventListener("click",e=>{
+  const t=e.target;
+  if(!(t instanceof SVGCircleElement)) return;
+  if(!t.id?.startsWith("Rond_")) return;
+  if(t.classList.contains("circle-disabled")) return;
+  t.classList.toggle("active");
+});
+
+/* =========================================================
+   SVG → STRING
+========================================================= */
+function svgStringFromUI(color){
+  const clone = ensureSVG().cloneNode(true);
+  clone.querySelectorAll("path").forEach(p=>p.setAttribute("fill",color));
+  clone.querySelectorAll('circle[id^="Rond_"]').forEach(c=>{
+    c.setAttribute("stroke",color);
+    c.setAttribute("fill",c.classList.contains("active")?color:"none");
+  });
+  clone.setAttribute("xmlns","http://www.w3.org/2000/svg");
+  return new XMLSerializer().serializeToString(clone);
+}
+
+/* =========================================================
+   SVG → IMAGE → CANVAS → BLOB
+========================================================= */
+const svgToImage = s => new Promise(res=>{
+  const i=new Image();
+  i.onload=()=>res(i);
+  i.src=URL.createObjectURL(new Blob([s],{type:"image/svg+xml"}));
+});
+
+async function rasterize(svgString,type){
+  const svg=ensureSVG();
+  const img=await svgToImage(svgString);
+
+  const vb=svg.viewBox?.baseVal;
+  const w=vb?.width||356,h=vb?.height||356;
+  const size=getExportSize();
+
+  const c=document.createElement("canvas");
+  c.width=size; c.height=Math.round(size*(h/w));
+  const ctx=c.getContext("2d");
+  if(type==="jpg"){ctx.fillStyle="#fff";ctx.fillRect(0,0,c.width,c.height);}
+  ctx.drawImage(img,0,0,c.width,c.height);
+
+  return new Promise(r=>c.toBlob(r,type==="png"?"image/png":"image/jpeg",JPG_QUALITY));
+}
+
+const download=(b,n)=>{
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(b); a.download=n; a.click();
+};
+
+/* =========================================================
+   EXPORTS
+========================================================= */
+btnPNG.onclick=()=>exportSingle("png");
+btnJPG.onclick=()=>exportSingle("jpg");
+
+async function exportSingle(type){
+  setBusy(true,`Export ${type.toUpperCase()}…`);
+  const svg=svgStringFromUI(getComputedStyle(document.documentElement)
+              .getPropertyValue("--logo-color"));
+  const blob=await rasterize(svg,type);
+  download(blob,`logo-${activitySelect.value}.${type}`);
+  setBusy(false);
+}
+
+/* ZIP activité */
+btnZIP.onclick=async()=>{
+  const JSZip=(await import("https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm")).default;
+  setBusy(true,"ZIP activité…");
+  const zip=new JSZip();
+  for(const [k,c] of Object.entries(EXPORT_COLORS)){
+    const s=svgStringFromUI(c);
+    zip.file(`PNG/${k}.png`,await rasterize(s,"png"));
+    zip.file(`JPG/${k}.jpg`,await rasterize(s,"jpg"));
   }
+  download(await zip.generateAsync({type:"blob"}),"zip-activite.zip");
+  setBusy(false);
+};
 
-  function applyActivity(key){
-    const a = ACTIVITIES[key];
-    if(!a) return;
-
-    resetCercles();
-    applyPresets(a.presets);
-
-    // Zones éditables / verrouillées
-    getCircles().forEach(c=>{
-      const z = c.id.split("_").pop();
-      if(Array.isArray(a.editableZones) && a.editableZones.includes(z)){
-        c.classList.remove("circle-disabled");
-      }else{
-        c.classList.add("circle-disabled");
-      }
-    });
-  }
-
-  function bindCircleClicks(){
-    // Bind une seule fois : on délègue au document (robuste même si SVG est recollé)
-    document.addEventListener("click", (e)=>{
-      const target = e.target;
-      if(!(target instanceof SVGCircleElement)) return;
-      if(!target.id || !target.id.startsWith("Rond_")) return;
-      if(target.classList.contains("circle-disabled")) return;
-      target.classList.toggle("active");
-    });
-  }
-
-  // ====== Export : génération SVG string depuis l'état UI ======
-  function generateColoredSVGStringFromUI(color){
-    const svg = ensureSVG();
-    const clone = svg.cloneNode(true);
-
-    clone.querySelectorAll("path").forEach(p => p.setAttribute("fill", color));
-    clone.querySelectorAll('circle[id^="Rond_"]').forEach(c => {
-      c.setAttribute("stroke", color);
-      c.setAttribute("fill", c.classList.contains("active") ? color : "none");
-    });
-
-    if(!clone.getAttribute("xmlns")){
-      clone.setAttribute("xmlns","http://www.w3.org/2000/svg");
+/* ZIP figés */
+btnLOCK.onclick=async()=>{
+  const JSZip=(await import("https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm")).default;
+  setBusy(true,"ZIP figés…");
+  const zip=new JSZip();
+  for(const [key,a] of Object.entries(ACTIVITIES)){
+    if(a.editableZones?.length) continue;
+    for(const [k,c] of Object.entries(EXPORT_COLORS)){
+      const clone=svgStringFromUI(c);
+      zip.file(`${key}/${k}.png`,await rasterize(clone,"png"));
     }
-
-    return new XMLSerializer().serializeToString(clone);
   }
+  download(await zip.generateAsync({type:"blob"}),"zip-figes.zip");
+  setBusy(false);
+};
 
-  // ====== Export : presets “figés” (sans dépendre des clics user) ======
-  function applyPresetsOnClone
+/* =========================================================
+   INIT
+========================================================= */
+generateActivityMenu();
+setUIColor(colorSelect.value);
+applyActivity(activitySelect.value);
+
+activitySelect.onchange=e=>applyActivity(e.target.value);
+colorSelect.onchange=()=>setUIColor(colorSelect.value);
+
+console.log("✅ Script module chargé");
+</script>
+
+</body>
+</html>
